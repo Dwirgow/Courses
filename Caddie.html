@@ -2,8 +2,17 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CaddieClair - V13 (Étiquettes Multicolores)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CaddieClair</title>
+
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CaddieClair">
+    
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236366f1'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E🛒%3C/text%3E%3C/svg%3E">
+    <link id="manifest-link" rel="manifest" href="">
+
     <style>
         :root {
             --bg-color: #f5f7fb;
@@ -22,17 +31,23 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 
+        /* Ajustement pour le plein écran PWA */
         body {
             background-color: var(--bg-color); color: var(--text-main);
             display: flex; justify-content: center; align-items: flex-start;
-            min-height: 100vh; padding: 20px;
+            min-height: 100vh; /* Fallback */
+            min-height: -webkit-fill-available;
+            margin: 0;
+            /* Pour gérer l'encoche des iPhones */
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         .app-container {
             width: 100%; max-width: 450px; background: var(--card-bg);
-            border-radius: var(--radius); box-shadow: var(--shadow);
+            box-shadow: var(--shadow);
             overflow: hidden; display: flex; flex-direction: column;
-            height: 90vh;
+            height: 100vh; /* Prend toute la hauteur sur mobile */
+            height: -webkit-fill-available;
             position: relative;
         }
 
@@ -45,9 +60,14 @@
 
         .view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
         .view.active { display: flex; }
-        .view-content { flex: 1; overflow-y: auto; padding: 20px; }
+        .view-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; /* Espace pour la navigation */ }
 
-        .bottom-nav { display: flex; background: white; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+        /* Barre de navigation fixée en bas */
+        .bottom-nav { 
+            display: flex; background: white; border-top: 1px solid var(--border-color); 
+            position: absolute; bottom: 0; width: 100%; z-index: 10;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
         .nav-btn {
             flex: 1; padding: 12px; border: none; background: transparent;
             font-size: 0.9rem; font-weight: bold; color: var(--text-muted); cursor: pointer;
@@ -72,13 +92,12 @@
         .shopping-item.checked .checkbox::after { content: "✓"; color: white; font-size: 0.8rem; }
         .item-name { font-weight: 500; font-size: 0.95rem; }
         
-        /* Conteneur et styles pour les étiquettes multiples */
         .sources-container { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
         .item-source { font-size: 0.65rem; padding: 3px 8px; border-radius: 8px; font-weight: 600; line-height: 1.2; display: inline-block; white-space: nowrap; }
         
         .btn-delete { background: transparent; border: none; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; padding: 0 5px;}
         
-        .footer-controls { padding: 15px 20px; background: #f8fafc; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;}
+        .footer-controls { padding: 15px 20px; background: #f8fafc; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-top: auto;}
         .footer-buttons { display: flex; gap: 15px; }
         .btn-clear-checked, .btn-clear-all { background:none; border:none; font-weight:bold; cursor:pointer; font-size: 0.85rem; }
         .btn-clear-checked { color:var(--text-muted); }
@@ -246,6 +265,35 @@
 
     <script>
         // ==========================================
+        // 🚀 INJECTION PWA (POUR INSTALLATION MOBILE)
+        // ==========================================
+        const appIconSVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236366f1'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E🛒%3C/text%3E%3C/svg%3E`;
+        
+        const manifestData = {
+            name: "CaddieClair IA",
+            short_name: "CaddieClair",
+            start_url: window.location.href,
+            display: "standalone",
+            background_color: "#f5f7fb",
+            theme_color: "#6366f1",
+            icons: [{ src: appIconSVG, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+        document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
+
+        // Service Worker basique pour valider les critères PWA d'installation
+        const swCode = `
+            self.addEventListener('install', e => self.skipWaiting());
+            self.addEventListener('activate', e => self.clients.claim());
+            self.addEventListener('fetch', e => {});
+        `;
+        const swBlob = new Blob([swCode], {type: 'application/javascript'});
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => console.log("SW non supporté localement"));
+        }
+
+        // ==========================================
         // 🔑 CONFIGURATION CLÉ API GEMINI
         // ==========================================
         const GEMINI_API_KEY = "AQ.Ab8RN6JVvIMCoWRSCAdbHosqozseWNN-G5f5dz0LYqdiOTGEjA"; 
@@ -255,40 +303,25 @@
             'Boucherie & Poissonnerie': '🥩', 'Entretien & Maison': '🧼', 'Divers / Autre': '🛒'
         };
 
-        // Palette pastel pour les étiquettes de recettes
         const badgeColors = [
-            { bg: '#e0e7ff', text: '#4f46e5' }, // Indigo
-            { bg: '#dcfce7', text: '#166534' }, // Vert
-            { bg: '#ffedd5', text: '#9a3412' }, // Orange
-            { bg: '#fce7f3', text: '#9d174d' }, // Rose
-            { bg: '#e0f2fe', text: '#075985' }, // Bleu ciel
-            { bg: '#fef08a', text: '#854d0e' }, // Jaune
-            { bg: '#f3e8ff', text: '#6b21a8' }  // Violet
+            { bg: '#e0e7ff', text: '#4f46e5' }, { bg: '#dcfce7', text: '#166534' }, 
+            { bg: '#ffedd5', text: '#9a3412' }, { bg: '#fce7f3', text: '#9d174d' }, 
+            { bg: '#e0f2fe', text: '#075985' }, { bg: '#fef08a', text: '#854d0e' }, 
+            { bg: '#f3e8ff', text: '#6b21a8' }
         ];
 
-        // Données en mémoire
         let shoppingList = [];
         let fetchedRecipes = []; 
         let favorites = [];
         let lastUserIntention = ""; 
         let currentPortions = 2; 
 
-        // ==========================================
-        // FONCTION UTILITAIRE : COULEUR PAR RECETTE
-        // ==========================================
-        // Assigne toujours la même couleur à une même chaîne de texte (hash)
         function getColorForRecipe(recipeName) {
             let hash = 0;
-            for (let i = 0; i < recipeName.length; i++) {
-                hash = recipeName.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            const index = Math.abs(hash) % badgeColors.length;
-            return badgeColors[index];
+            for (let i = 0; i < recipeName.length; i++) hash = recipeName.charCodeAt(i) + ((hash << 5) - hash);
+            return badgeColors[Math.abs(hash) % badgeColors.length];
         }
 
-        // ==========================================
-        // NAVIGATION (ONGLETS)
-        // ==========================================
         function switchTab(tabName) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -297,18 +330,12 @@
             if (tabName === 'favorites') renderFavorites();
         }
 
-        // ==========================================
-        // LOGIQUE FAVORIS
-        // ==========================================
         function toggleFavorite(recipeId) {
             let recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId);
             if (!recipe) return;
             const index = favorites.findIndex(f => f.id === recipeId);
-            if (index > -1) {
-                favorites.splice(index, 1);
-            } else {
-                favorites.push(recipe);
-            }
+            if (index > -1) favorites.splice(index, 1);
+            else favorites.push(recipe);
             displayGeneratedRecipes(fetchedRecipes);
             renderFavorites();
         }
@@ -316,12 +343,10 @@
         function renderFavorites() {
             const container = document.getElementById('favorites-container');
             container.innerHTML = '';
-
             if (favorites.length === 0) {
                 container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;">Vous n'avez pas encore de favoris. Cliquez sur le cœur 🤍 d'une recette pour l'ajouter ici.</div>`;
                 return;
             }
-
             favorites.forEach(recipe => {
                 container.innerHTML += `
                     <div class="recipe-card" id="fav-card-${recipe.id}">
@@ -340,14 +365,10 @@
                             <button class="btn-action btn-view" onclick="openRecipeDetails(${recipe.id})">📖 Lire</button>
                             <button class="btn-action btn-add-single" id="btn-add-fav-${recipe.id}" onclick="addRecipeToCart(${recipe.id}, 'fav')">🛒 Ajouter</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
-        // ==========================================
-        // LOGIQUE PANIER ET FUSION DES INGRÉDIENTS
-        // ==========================================
         function renderApp() {
             const container = document.getElementById('list-container');
             const countLabel = document.getElementById('items-count');
@@ -376,7 +397,6 @@
                     li.className = `shopping-item ${item.checked ? 'checked' : ''}`;
                     li.onclick = () => toggleCheckItem(item.id);
 
-                    // Générer dynamiquement les petits badges colorés
                     let sourcesHtml = '';
                     if (item.sourceType === 'recipe' && item.sourceNames) {
                         sourcesHtml = '<div class="sources-container">';
@@ -409,111 +429,68 @@
         function clearChecked() { shoppingList = shoppingList.filter(i => !i.checked); renderApp(); }
         function clearAll() { if(confirm("Vider tout le panier ?")) { shoppingList = []; renderApp(); } }
 
-        // Normalise les chaînes pour la comparaison (enlève les "s" finaux, met en minuscules)
-        function normalizeString(str) {
-            if (!str) return "";
-            return str.toLowerCase().trim().replace(/s$/, '');
-        }
+        function normalizeString(str) { return str ? str.toLowerCase().trim().replace(/s$/, '') : ""; }
 
         function addRecipeToCart(recipeId, source = 'main') {
             const recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId);
             if (!recipe) return;
-            
             const btnId = source === 'fav' ? `btn-add-fav-${recipeId}` : `btn-add-${recipeId}`;
             const btn = document.getElementById(btnId);
 
             recipe.ingredients.forEach(ing => {
-                // Remplacement de la virgule par un point pour la conversion en nombre
                 const parsedQte = parseFloat(String(ing.qte).replace(',', '.'));
                 const baseName = normalizeString(ing.nom);
                 const baseUnit = normalizeString(ing.unite);
 
-                // On cherche si on a déjà un ingrédient similaire
                 let existingItem = null;
                 if (!isNaN(parsedQte)) {
-                    existingItem = shoppingList.find(item =>
-                        item.sourceType === 'recipe' &&
-                        normalizeString(item.rawName) === baseName &&
-                        normalizeString(item.rawUnit) === baseUnit
-                    );
+                    existingItem = shoppingList.find(item => item.sourceType === 'recipe' && normalizeString(item.rawName) === baseName && normalizeString(item.rawUnit) === baseUnit);
                 }
 
                 if (existingItem && !isNaN(existingItem.rawQte)) {
-                    // L'ingrédient existe : On additionne les quantités
                     existingItem.rawQte = Math.round((existingItem.rawQte + parsedQte) * 100) / 100;
-                    
                     const texteUnite = (existingItem.rawUnit === "pièce" || existingItem.rawUnit === "pièces") ? "" : existingItem.rawUnit;
                     existingItem.name = `${existingItem.rawQte} ${texteUnite} ${existingItem.rawName}`.trim();
-                    existingItem.checked = false; // On le décoche s'il était coché
-                    
-                    // On ajoute le nom de la recette au tableau (s'il n'y est pas déjà)
-                    if (!existingItem.sourceNames.includes(recipe.nom)) {
-                        existingItem.sourceNames.push(recipe.nom);
-                    }
+                    existingItem.checked = false; 
+                    if (!existingItem.sourceNames.includes(recipe.nom)) existingItem.sourceNames.push(recipe.nom);
                 } else {
-                    // Nouvel ingrédient
                     const texteUnite = (ing.unite === "pièce" || ing.unite === "pièces") ? "" : ing.unite;
-                    const nomIngredientFinal = `${ing.qte} ${texteUnite} ${ing.nom}`.trim();
-
                     shoppingList.push({
                         id: Date.now() + Math.random().toString(),
-                        name: nomIngredientFinal,
+                        name: `${ing.qte} ${texteUnite} ${ing.nom}`.trim(),
                         category: ing.rayon,
-                        checked: false,
-                        sourceType: 'recipe',
-                        sourceNames: [recipe.nom], // On utilise un tableau maintenant
-                        // Stockage des données brutes pour les futures additions
-                        rawName: ing.nom.trim(),
-                        rawUnit: ing.unite.trim(),
-                        rawQte: isNaN(parsedQte) ? ing.qte : parsedQte
+                        checked: false, sourceType: 'recipe', sourceNames: [recipe.nom],
+                        rawName: ing.nom.trim(), rawUnit: ing.unite.trim(), rawQte: isNaN(parsedQte) ? ing.qte : parsedQte
                     });
                 }
             });
 
-            if(btn) {
-                btn.innerHTML = "✅ Ajouté";
-                btn.classList.add("added");
-            }
+            if(btn) { btn.innerHTML = "✅ Ajouté"; btn.classList.add("added"); }
             renderApp(); 
         }
 
-        // ==========================================
-        // LOGIQUE IA GEMINI
-        // ==========================================
         function resetRecipes() {
-            fetchedRecipes = [];
-            lastUserIntention = "";
-            document.getElementById('custom-prompt').value = ""; 
-            document.getElementById('recipes-container').innerHTML = '';
-            document.getElementById('prompts-section').style.display = 'block';
+            fetchedRecipes = []; lastUserIntention = ""; document.getElementById('custom-prompt').value = ""; 
+            document.getElementById('recipes-container').innerHTML = ''; document.getElementById('prompts-section').style.display = 'block';
             document.getElementById('btn-reset').style.display = 'none';
         }
 
         function handleEnter(e) { if (e.key === 'Enter') handleCustomPrompt(); }
-        function handleCustomPrompt() {
-            const input = document.getElementById('custom-prompt').value.trim();
-            if (input !== "") askAI(input);
-        }
+        function handleCustomPrompt() { const input = document.getElementById('custom-prompt').value.trim(); if (input !== "") askAI(input); }
 
         async function askAI(userIntention) {
-            currentPortions = document.getElementById('portions').value || 2;
-            lastUserIntention = userIntention; 
-            
-            const promptsSection = document.getElementById('prompts-section');
-            const recipesContainer = document.getElementById('recipes-container');
-            
-            promptsSection.style.display = 'none';
-            recipesContainer.innerHTML = `<div class="loader"><div class="spinner"></div>L'IA élabore vos repas...</div>`;
+            currentPortions = document.getElementById('portions').value || 2; lastUserIntention = userIntention; 
+            document.getElementById('prompts-section').style.display = 'none';
+            document.getElementById('recipes-container').innerHTML = `<div class="loader"><div class="spinner"></div>L'IA élabore vos repas...</div>`;
 
             const systemPrompt = `Tu es un assistant culinaire français.
 L'utilisateur souhaite des recettes pour ${currentPortions} personne(s). Tu dois scrupuleusement adapter les quantités des ingrédients et le budget pour ce nombre exact de personnes.
 
 RÈGLES DE BON SENS POUR LES COURSES :
 1. Pour les ingrédients à la pièce (ex: laitue, oignon, avocat, œuf), n'utilise JAMAIS de décimales (comme 0.5). Arrondis toujours à l'entier supérieur (ex: "1").
-2. L'unité de base pour les poids et volumes doit STRICTEMENT être le "gramme" (g) ou le "millilitre" (ml). N'utilise JAMAIS les kilos (kg) ou les litres (L). Exemple : écris "500 grammes" et JAMAIS "0.5 kg".
+2. L'unité de base pour les poids et volumes doit STRICTEMENT être le "gramme" (g) ou le "millilitre" (ml). N'utilise JAMAIS les kilos (kg) ou les litres (L).
 
-REGLE DE SECURITE STRICTE : Si la requête de l'utilisateur n'est pas liée à la cuisine, aux repas ou à la nourriture, tu dois OBLIGATOIREMENT renvoyer ce JSON exact et rien d'autre :
-{ "error": "Désolé, je suis un assistant culinaire et je ne peux traiter que les demandes liées aux recettes et à la nourriture." }
+REGLE DE SECURITE STRICTE : Si la requête n'est pas liée à la cuisine, renvoie: { "error": "Désolé, je suis un assistant culinaire..." }
 
 Sinon, tu dois OBLIGATOIREMENT répondre avec un objet JSON strict correspondant à ce format exact :
 {
@@ -526,145 +503,80 @@ Sinon, tu dois OBLIGATOIREMENT répondre avec un objet JSON strict correspondant
       "temps_cuisson": 20,
       "budget_moyen": "Environ 12€",
       "portions": ${currentPortions},
-      "ingredients": [
-        {"nom": "Tomate", "qte": "2", "unite": "pièces", "rayon": "Fruits & Légumes"}
-      ],
-      "etapes": [
-        "Laver et couper les tomates."
-      ]
+      "ingredients": [ {"nom": "Tomate", "qte": "2", "unite": "pièces", "rayon": "Fruits & Légumes"} ],
+      "etapes": [ "Laver et couper les tomates." ]
     }
   ]
 }
 Rayons STRICTEMENT : "Fruits & Légumes", "Produits Laitiers", "Boulangerie", "Épicerie", "Boucherie & Poissonnerie", "Entretien & Maison", "Divers / Autre".`;
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemPrompt + "\n\nRequête : " + userIntention }] }],
-                        generationConfig: { responseMimeType: "application/json" }
-                    })
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
+                    method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt + "\n\nRequête : " + userIntention }] }], generationConfig: { responseMimeType: "application/json" } })
                 });
 
                 const data = await response.json();
                 if(data.error) throw new Error(data.error.message);
-
-                const jsonString = data.candidates[0].content.parts[0].text;
-                const parsedData = JSON.parse(jsonString);
+                const parsedData = JSON.parse(data.candidates[0].content.parts[0].text);
 
                 if (parsedData.error) {
                     document.getElementById('btn-reset').style.display = 'block';
-                    recipesContainer.innerHTML = `
-                        <div style="color: var(--text-main); text-align: center; padding: 25px; background: #fee2e2; border-radius: 16px; margin-top: 10px; border: 1px solid #fca5a5;">
-                            <span style="font-size: 2.5rem; margin-bottom: 10px; display: block;">🛑</span>
-                            <b>Hors-sujet détecté</b><br><br>
-                            <i>${parsedData.error}</i>
-                        </div>`;
+                    document.getElementById('recipes-container').innerHTML = `<div style="color: var(--text-main); text-align: center; padding: 25px; background: #fee2e2; border-radius: 16px; margin-top: 10px; border: 1px solid #fca5a5;"><span style="font-size: 2.5rem; margin-bottom: 10px; display: block;">🛑</span><b>Hors-sujet détecté</b><br><br><i>${parsedData.error}</i></div>`;
                     return;
                 }
 
                 parsedData.recipes.forEach(r => r.id = Date.now() + Math.floor(Math.random() * 1000));
                 displayGeneratedRecipes(parsedData.recipes);
-
             } catch (error) {
-                recipesContainer.innerHTML = `
-                    <div style="color: var(--danger); text-align: center; padding: 20px;">
-                        <b>Erreur de l'IA.</b><br><br>
-                        <i>${error.message}</i><br><br>
-                        <button onclick="resetRecipes()" style="padding:10px; margin-top:15px; border-radius: 8px; border: none; background: var(--primary); color: white; cursor: pointer;">Réessayer</button>
-                    </div>`;
+                document.getElementById('recipes-container').innerHTML = `<div style="color: var(--danger); text-align: center; padding: 20px;"><b>Erreur de l'IA.</b><br><br><i>${error.message}</i><br><br><button onclick="resetRecipes()" style="padding:10px; border-radius: 8px; border: none; background: var(--primary); color: white; cursor: pointer;">Réessayer</button></div>`;
             }
         }
 
         async function regenerateRecipe(recipeId) {
             const recipeIndex = fetchedRecipes.findIndex(r => r.id === recipeId);
             if (recipeIndex === -1) return;
-            const oldRecipe = fetchedRecipes[recipeIndex];
-
-            const card = document.getElementById(`recipe-card-${recipeId}`);
-            if (card) card.innerHTML = `<div class="loader" style="padding: 20px 0;"><div class="spinner"></div>Changement en cours...</div>`;
+            document.getElementById(`recipe-card-${recipeId}`).innerHTML = `<div class="loader" style="padding: 20px 0;"><div class="spinner"></div>Changement en cours...</div>`;
 
             const systemPrompt = `Tu es un assistant culinaire français.
-L'utilisateur avait fait cette demande initiale : "${lastUserIntention}", pour ${currentPortions} personne(s).
-Cependant, il ne souhaite pas conserver la recette "${oldRecipe.nom}". 
-Génère UNE SEULE nouvelle recette différente pour la remplacer, qui respecte toujours la demande initiale.
-
-Adapte bien les quantités et le budget pour ${currentPortions} personne(s).
+L'utilisateur avait fait cette demande initiale : "${lastUserIntention}", pour ${currentPortions} personne(s). Cependant, il ne souhaite pas conserver la recette "${fetchedRecipes[recipeIndex].nom}". Génère UNE SEULE nouvelle recette différente. Adapte bien les quantités.
 
 RÈGLES DE BON SENS POUR LES COURSES :
-1. Pour les ingrédients à la pièce (ex: laitue, oignon, avocat, œuf), n'utilise JAMAIS de décimales (comme 0.5). Arrondis toujours à l'entier supérieur (ex: "1").
-2. L'unité de base pour les poids et volumes doit STRICTEMENT être le "gramme" (g) ou le "millilitre" (ml). N'utilise JAMAIS les kilos (kg) ou les litres (L). Exemple : écris "500 grammes" et JAMAIS "0.5 kg".
+1. Pas de décimales pour les pièces.
+2. Utilise "gramme" (g) ou "millilitre" (ml). Jamais kg ou L.
 
-Tu dois OBLIGATOIREMENT répondre avec un objet JSON strict correspondant à ce format exact :
-{
-  "recipes": [
-    {
-      "id": ${Date.now()},
-      "nom": "Nom de la nouvelle recette",
-      "emoji": "🥗",
-      "temps_preparation": 15,
-      "temps_cuisson": 20,
-      "budget_moyen": "Environ 12€",
-      "portions": ${currentPortions},
-      "ingredients": [
-        {"nom": "Tomate", "qte": "2", "unite": "pièces", "rayon": "Fruits & Légumes"}
-      ],
-      "etapes": ["Laver et couper les tomates."]
-    }
-  ]
-}
-Rayons STRICTEMENT : "Fruits & Légumes", "Produits Laitiers", "Boulangerie", "Épicerie", "Boucherie & Poissonnerie", "Entretien & Maison", "Divers / Autre".`;
+Réponds avec un objet JSON strict correspondant à ce format exact :
+{ "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom", "emoji": "🥗", "temps_preparation": 15, "temps_cuisson": 20, "budget_moyen": "12€", "portions": ${currentPortions}, "ingredients": [ {"nom": "Tomate", "qte": "2", "unite": "pièces", "rayon": "Fruits & Légumes"} ], "etapes": ["Laver les tomates."] } ] }`;
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemPrompt }] }],
-                        generationConfig: { responseMimeType: "application/json" }
-                    })
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
+                    method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }], generationConfig: { responseMimeType: "application/json" } })
                 });
 
                 const data = await response.json();
                 if(data.error) throw new Error(data.error.message);
-
-                const jsonString = data.candidates[0].content.parts[0].text;
-                const parsedData = JSON.parse(jsonString);
-                
-                fetchedRecipes[recipeIndex] = parsedData.recipes[0];
+                fetchedRecipes[recipeIndex] = JSON.parse(data.candidates[0].content.parts[0].text).recipes[0];
                 displayGeneratedRecipes(fetchedRecipes);
-
-            } catch (error) {
-                alert("Erreur lors du remplacement : " + error.message);
-                displayGeneratedRecipes(fetchedRecipes); 
-            }
+            } catch (error) { alert("Erreur : " + error.message); displayGeneratedRecipes(fetchedRecipes); }
         }
 
         function displayGeneratedRecipes(recipesArray) {
             fetchedRecipes = recipesArray; 
             const container = document.getElementById('recipes-container');
-            const btnReset = document.getElementById('btn-reset');
-            
             if (recipesArray.length > 0) {
-                container.innerHTML = '';
-                btnReset.style.display = 'block'; 
-
+                container.innerHTML = ''; document.getElementById('btn-reset').style.display = 'block'; 
                 recipesArray.forEach(recipe => {
                     const isFav = favorites.some(f => f.id === recipe.id);
-                    const heartIcon = isFav ? '❤️' : '🤍';
-
                     container.innerHTML += `
                         <div class="recipe-card" id="recipe-card-${recipe.id}">
-                            <button class="btn-heart" onclick="toggleFavorite(${recipe.id})">${heartIcon}</button>
+                            <button class="btn-heart" onclick="toggleFavorite(${recipe.id})">${isFav ? '❤️' : '🤍'}</button>
                             <div class="recipe-header">
                                 <div class="recipe-emoji-box">${recipe.emoji}</div>
                                 <div class="recipe-info">
                                     <h4>${recipe.nom}</h4>
                                     <div class="recipe-stats">
-                                        <span>🔪 Prép : ${recipe.temps_preparation} min • 🔥 Cuis : ${recipe.temps_cuisson} min</span>
+                                        <span>🔪 Prép: ${recipe.temps_preparation} min • 🔥 Cuis: ${recipe.temps_cuisson} min</span>
                                         <span>💰 ${recipe.budget_moyen} • 👨‍🍳 ${recipe.portions} pers.</span>
                                     </div>
                                 </div>
@@ -674,37 +586,23 @@ Rayons STRICTEMENT : "Fruits & Légumes", "Produits Laitiers", "Boulangerie", "�
                                 <button class="btn-action btn-regenerate" onclick="regenerateRecipe(${recipe.id})">🔄 Changer</button>
                                 <button class="btn-action btn-add-single" id="btn-add-${recipe.id}" onclick="addRecipeToCart(${recipe.id})">🛒 Ajouter</button>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
             }
         }
 
-        // ==========================================
-        // LECTURE DES ÉTAPES (MODAL)
-        // ==========================================
         function openRecipeDetails(recipeId) {
             const recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId);
             if (!recipe) return;
-
             document.getElementById('details-title').innerText = `${recipe.emoji} ${recipe.nom}`;
-            document.getElementById('details-stats').innerHTML = `
-                <span>🔪 ${recipe.temps_preparation} min</span>
-                <span>🔥 ${recipe.temps_cuisson} min</span>
-                <span>👨‍🍳 ${recipe.portions} pers.</span>
-            `;
-
-            let stepsHtml = '<ol>';
-            recipe.etapes.forEach(etape => { stepsHtml += `<li>${etape}</li>`; });
-            stepsHtml += '</ol>';
-
+            document.getElementById('details-stats').innerHTML = `<span>🔪 ${recipe.temps_preparation} min</span><span>🔥 ${recipe.temps_cuisson} min</span><span>👨‍🍳 ${recipe.portions} pers.</span>`;
+            let stepsHtml = '<ol>' + recipe.etapes.map(e => `<li>${e}</li>`).join('') + '</ol>';
             document.getElementById('details-steps').innerHTML = stepsHtml;
             document.getElementById('recipe-details-modal').style.display = 'flex';
         }
 
         function closeRecipeDetails() { document.getElementById('recipe-details-modal').style.display = 'none'; }
 
-        // Initialisation de l'application
         renderApp();
     </script>
 </body>
