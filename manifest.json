@@ -1,6 +1,6 @@
 {
-  "name": "CaddieClair IA",
-  "short_name": "CaddieClair",
+  "name": "InspiToque",
+  "short_name": "InspiToque",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f7fb",
