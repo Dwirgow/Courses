@@ -94,6 +94,7 @@
             align-items: center;
             position: relative; /* Permet d'épingler le logo par rapport à ce conteneur */
             min-height: 65px; /* S'assure que le bandeau est assez haut pour le logo */
+	    margin-top: 15px;
         }
         
         .header-logo-large {
@@ -344,7 +345,7 @@
                     </div>
 
                     <div class="custom-search-bar">
-                        <input type="text" id="custom-prompt" class="custom-search-input" placeholder="Ex: Une recette de boeuf bourguignon..." onkeypress="handleEnter(event)">
+                        <input type="text" id="custom-prompt" class="custom-search-input" placeholder="Ex: Boeuf bourguignon..." onkeypress="handleEnter(event)">
                         <button class="btn-search" onclick="handleCustomPrompt()">Chercher</button>
                     </div>
                     <h3 style="margin-bottom:15px; font-size:0.95rem; color: var(--text-muted); text-align: center;">Ou choisissez une inspiration rapide :</h3>
