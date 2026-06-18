@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>InspiToque</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka:wght@500&display=swap" rel="stylesheet">
 
-    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -42,7 +42,6 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
     }
 
-    /* Fond global premium avec dégradé subtil */
     /* Fond d'écran global */
     body {
         background: linear-gradient(135deg, #c7d2fe 0%, #e0e7ff 40%, #fbcfe8 100%);
@@ -50,25 +49,25 @@
         color: var(--text-main);
         display: flex; justify-content: center; align-items: center;
         margin: 0; padding: 0;
-        width: 100%; height: 100dvh; /* 100% au lieu de 100vw pour éviter le bug de scroll */
+        width: 100%; height: 100dvh; 
         overflow: hidden;
     }
 
     /* FORCER LE PLEIN ÉCRAN SUR MOBILE */
     .app-container {
-        position: absolute; /* Ancrage total aux bords de l'écran */
+        position: absolute; 
         top: 0; left: 0; right: 0; bottom: 0;
         width: 100%; max-width: 100%; 
         margin: 0; padding: 0;
         background: transparent !important; 
         display: flex; flex-direction: column;
-        overflow-x: hidden; /* Empêche tout décalage horizontal */
+        overflow-x: hidden; 
     }
 
     /* Retour au mode centré "téléphone virtuel" sur Ordinateur */
     @media (min-width: 500px) {
         .app-container {
-            position: relative; /* Annule l'ancrage absolu */
+            position: relative; 
             top: auto; left: auto; right: auto; bottom: auto;
             max-width: 480px; 
             height: 95dvh; 
@@ -79,86 +78,85 @@
             overflow: hidden;
         }
     }
+
     header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white; 
-            padding: env(safe-area-inset-top, 25px) 20px 20px 20px; 
-            flex-shrink: 0;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
-            z-index: 5;
-            width: 100%; /* Force la largeur */
-            box-sizing: border-box; /* Oblige le padding à rester en dedans */
-        }
-        
-        .header-content {
-            display: flex;
-            align-items: center;
-            position: relative; /* Permet d'épingler le logo par rapport à ce conteneur */
-            min-height: 65px; /* S'assure que le bandeau est assez haut pour le logo */
-	    margin-top: 25px;
-        }
-        
-        .header-logo-large {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%); /* Centre le logo verticalement tout à gauche */
-            width: 65px; 
-            height: 65px;
-            border-radius: 16px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.25); 
-            object-fit: cover;
-            background-color: white; 
-        }
-        
-        .header-text {
-            text-align: center; /* Centre le texte */
-            width: 100%; /* Prend toute la largeur pour garantir un centrage parfait */
-            padding: 0 75px; /* Sécurité : empêche le texte de passer sous le logo sur les petits écrans */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        .header-text h1 { 
-	    font-family: 'Pacifico';
-            font-size: 2rem; 
-            font-weight: normal; 
-            letter-spacing: 1.2px; 
-            margin: 0 0 4px 0; 
-        }
-        
-        .header-text p { 
-	    font-family: 'Fredoka';
-            font-size: 0.85rem; 
-            opacity: 0.9; 
-            font-weight: normal; 
-	    letter-spacing: 1.2px;
-            margin: 0; 
-        }
-        header h1 { font-size: 1.5rem; margin: 0; }
-        header p { font-size: 0.85rem; opacity: 0.9; margin: 0;}
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white; 
+        padding: env(safe-area-inset-top, 15px) 15px 15px 15px; 
+        flex-shrink: 0;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        z-index: 5;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        position: relative; 
+        min-height: 50px; 
+        margin-top: 5px; 
+    }
+
+    .header-logo-large {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 50px;  
+        height: 50px; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.25); 
+        object-fit: cover;
+        background-color: white; 
+    }
+    
+    .header-text {
+        text-align: center; 
+        width: 100%; 
+        padding: 0 75px; 
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .header-text h1 { 
+        font-family: 'Pacifico', cursive;
+        font-size: 2rem; 
+        font-weight: normal; 
+        letter-spacing: 1.2px; 
+        margin: 0 0 4px 0; 
+    }
+    
+    .header-text p { 
+        font-family: 'Fredoka', sans-serif;
+        font-size: 0.85rem; 
+        opacity: 0.9; 
+        font-weight: normal; 
+        letter-spacing: 1.2px;
+        margin: 0; 
+    }
 
     .view { display: none; flex-direction: column; flex: 1; overflow: hidden; background: transparent !important; }
-    .view.active { display: flex; animation: fadeIn 0.3s ease-in-out; background: transparent !important; }
+    .view.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     
     .view-content { flex: 1; overflow-y: auto; overflow-x: hidden; width: 100%; box-sizing: border-box; padding: 20px; padding-bottom: 90px; }
 
     /* Barre de navigation modernisée */
     .bottom-nav { 
-            display: flex; 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px);
-            border-top: 1px solid var(--border-color); 
-            position: absolute; 
-            bottom: 0; 
-            left: 0; right: 0; /* Épinglé à gauche ET à droite */
-            width: 100%; 
-            box-sizing: border-box;
-            z-index: 10;
-            padding-bottom: env(safe-area-inset-bottom, 0);
-        }
+        display: flex; 
+        background: rgba(255, 255, 255, 0.95); 
+        backdrop-filter: blur(10px);
+        border-top: 1px solid var(--border-color); 
+        position: absolute; 
+        bottom: 0; 
+        left: 0; right: 0; 
+        width: 100%; 
+        box-sizing: border-box;
+        z-index: 10;
+        padding-bottom: env(safe-area-inset-bottom, 0);
+    }
     .nav-btn {
         flex: 1; padding: 14px 10px; border: none; background: transparent;
         font-size: 0.85rem; font-weight: 600; color: var(--text-muted); cursor: pointer;
@@ -178,10 +176,12 @@
     /* --- COURSES --- */
     .rayon-section { margin-bottom: 24px; }
     .rayon-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; font-weight: 700; padding-left: 5px; }
-    .item-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .item-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
     .shopping-item { 
         display: flex; justify-content: space-between; align-items: center;
-        background: white; padding: 14px 16px; border-radius: 14px; 
+        background: white; 
+        padding: 10px 14px; /* Marges internes réduites pour un encadré plus fin */
+        border-radius: 12px; /* Coins légèrement moins arrondis pour aller avec la nouvelle taille */
         border: 1px solid var(--border-color); cursor: pointer;
         box-shadow: var(--shadow-sm); transition: all 0.2s ease;
     }
@@ -197,49 +197,23 @@
     .item-source { font-size: 0.65rem; padding: 4px 8px; border-radius: 6px; font-weight: 700; display: inline-block; white-space: nowrap; }
     .btn-delete { background: transparent; border: none; color: #cbd5e1; font-size: 1.4rem; cursor: pointer; padding: 5px; transition: color 0.2s; }
     .btn-delete:hover { color: var(--danger); }
+    
     .footer-controls {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px 20px;
-            border-top: 1px solid var(--border-color);
-            /* C'est cette ligne qui sauve les boutons : elle les pousse au-dessus de la navbar */
-            margin-bottom: 90px; 
-            position: relative;
-            z-index: 5;
-        }
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px 20px; /* Ajusté pour plus d'harmonie */
+        border-top: 1px solid var(--border-color);
+        margin-bottom: 70px; 
+        position: relative;
+        z-index: 5;
+    }
 
-        /* Et un petit style pour les boutons au cas où tu l'aurais perdu */
-        .footer-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn-clear-checked, .btn-clear-all {
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        
-        .btn-clear-checked {
-            background: #e0e7ff;
-            color: var(--primary-dark);
-        }
-        
-        .btn-clear-all {
-            background: #ffe4e6;
-            color: #e11d48;
-        }
-    .footer-buttons { display: flex; gap: 15px; }
-    .btn-clear-checked, .btn-clear-all { background:none; border:none; font-weight:600; cursor:pointer; font-size: 0.85rem; padding: 6px 12px; border-radius: 8px; transition: background 0.2s; }
-    .btn-clear-checked { color: var(--text-muted); }
-    .btn-clear-checked:hover { background: #e2e8f0; color: var(--text-main); }
-    .btn-clear-all { color: var(--danger); }
-    .btn-clear-all:hover { background: #fee2e2; }
+    .footer-buttons { display: flex; gap: 10px; }
+    .btn-clear-checked, .btn-clear-all { padding: 8px 12px; border-radius: 8px; border: none; font-weight: bold; font-size: 0.85rem; cursor: pointer; font-family: 'Fredoka', sans-serif;}
+    .btn-clear-checked { background: #e0e7ff; color: var(--primary-dark); }
+    .btn-clear-all { background: #ffe4e6; color: #e11d48; }
 
     /* --- RECETTES & RECHERCHE --- */
     .portions-bar { display: flex; align-items: center; justify-content: space-between; background: white; padding: 14px 18px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 20px; box-shadow: var(--shadow-sm); }
@@ -252,7 +226,6 @@
     .custom-search-input::placeholder { color: #94a3b8; font-weight: 400; }
     .custom-search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
     
-    /* Boutons d'action principaux modernisés */
     .btn-search, .btn-reset { 
         background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
         color: white; border: none; padding: 0 20px; border-radius: 14px; 
@@ -331,11 +304,50 @@
     .loader { text-align: center; padding: 50px 20px; color: var(--primary); font-weight: 600; display:flex; flex-direction:column; align-items:center; gap:20px; font-size: 1.1rem;}
     .spinner { border: 4px solid rgba(99, 102, 241, 0.15); border-left-color: var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-</style>
+
+    /* --- POLICE FREDOKA POUR LE PIED DE PAGE --- */
+    #items-count, 
+    .btn-clear-checked, 
+    .btn-clear-all {
+        font-family: 'Fredoka', sans-serif !important;
+        font-weight: normal !important; 
+        font-size: 1rem !important; 
+    }
+
+    /* --- AJOUT MANUEL D'ARTICLES --- */
+    .add-item-container {
+        display: flex;
+        padding: 15px 20px 0 20px;
+        gap: 10px;
+    }
+    .add-item-container input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        outline: none;
+        font-family: inherit;
+    }
+    .add-item-container button {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border: none;
+        border-radius: 12px;
+        width: 45px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+    }
+    </style>
 </head>
 <body>
     <div id="auth-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
-        <h1 style="color: var(--primary); font-size: 2rem; margin-bottom: 10px;">InspiToque</h1>
+        <h1 style="color: var(--primary); font-size: 2rem; margin-bottom: 10px; font-family: 'Pacifico', cursive;">InspiToque</h1>
         <p style="color: var(--text-muted); margin-bottom: 30px;">Connectez-vous pour voir vos courses</p>
         
         <input type="email" id="auth-email" placeholder="Adresse e-mail" style="width: 100%; max-width: 300px; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 1rem;">
@@ -345,20 +357,25 @@
         <button onclick="handleSignup()" style="width: 100%; max-width: 300px; background: white; color: var(--primary); border: 2px solid var(--primary); padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer;">Créer un compte</button>
         <div id="auth-error" style="color: var(--danger); margin-top: 15px; font-size: 0.9rem; text-align: center;"></div>
     </div>
+    
     <div class="app-container">
         <header>
             <div class="header-content">
                 <img src="icon.png" alt="Logo InspiToque" class="header-logo-large">
                 <div class="header-text">
                     <h1>InspiToque</h1>
-                    Facilite les repas & les courses</p>
+                    <p>Facilite les repas & les courses</p>
                 </div>
             </div>
         </header>
 
-        <!-- ONGLET 1 : COURSES -->
         <div id="view-list" class="view active">
-            <div class="view-content" id="list-container"></div> <div class="footer-controls">
+            <div class="add-item-container">
+                <input type="text" id="manual-item-input" placeholder="Ajouter un article (ex: Lait, Pommes...)">
+                <button onclick="addManualItem()">+</button>
+            </div>
+            <div class="view-content" id="list-container"></div> 
+            <div class="footer-controls">
                 <span id="items-count">0 article(s)</span>
                 <div class="footer-buttons">
                     <button class="btn-clear-checked" onclick="clearChecked()">Nettoyer</button>
@@ -367,7 +384,6 @@
             </div>
         </div>
 
-        <!-- ONGLET 2 : RECETTES -->
         <div id="view-recipes" class="view">
             <div class="view-content">
                 <button id="btn-reset" class="btn-reset" onclick="resetRecipes()">🔄 Nouvelle recherche</button>
@@ -406,21 +422,33 @@
             </div>
         </div>
 
-        <!-- ONGLET 3 : FAVORIS -->
         <div id="view-favorites" class="view">
             <div class="view-content">
                 <h3 style="margin-bottom:15px; font-size:1.1rem; text-align: center;">❤️ Vos recettes préférées</h3>
-                <div id="favorites-container" class="recipe-list"></div> </div>
+                <div id="favorites-container" class="recipe-list"></div> 
+            </div>
         </div>
 
-        <!-- BARRE DE NAVIGATION -->
+        <div id="view-classics" class="view">
+            <div class="view-content">
+                <h3 style="text-align: center; margin-bottom: 15px;">📦 Vos achats réguliers</h3>
+                
+                <div class="add-item-container" style="padding: 0; margin-bottom: 20px;">
+                    <input type="text" id="classic-item-input" placeholder="Ex: Lait, Beurre, Café...">
+                    <button onclick="addClassicItem()">+</button>
+                </div>
+
+                <div id="classics-container" class="recipe-list"></div>
+            </div>
+        </div>
+
         <div class="bottom-nav">
-            <button id="tab-list" class="nav-btn active" onclick="switchTab('list')"><span>🛒</span> Courses</button>
-            <button id="tab-recipes" class="nav-btn" onclick="switchTab('recipes')"><span>👨‍🍳</span> Recettes</button>
-            <button id="tab-favorites" class="nav-btn" onclick="switchTab('favorites')"><span>❤️</span> Favoris</button>
+            <button id="tab-list" class="nav-btn active" onclick="switchTab('list')"><span>🛒</span> </button>
+            <button id="tab-recipes" class="nav-btn" onclick="switchTab('recipes')"><span>👨‍🍳</span> </button>
+            <button id="tab-favorites" class="nav-btn" onclick="switchTab('favorites')"><span>❤️</span> </button>
+            <button id="tab-classics" class="nav-btn" onclick="switchTab('classics')"><span>📦</span> </button>
         </div>
 
-        <!-- MODAL DÉTAILS RECETTE -->
         <div class="modal-overlay" id="recipe-details-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -453,10 +481,10 @@
         const rayonIcons = { 'Fruits & Légumes': '🥦', 'Produits Laitiers': '🥛', 'Boulangerie': '🥖', 'Épicerie': '📦', 'Boucherie & Poissonnerie': '🥩', 'Entretien & Maison': '🧼', 'Divers / Autre': '🛒' };
         const badgeColors = [ { bg: '#e0e7ff', text: '#4f46e5' }, { bg: '#dcfce7', text: '#166534' }, { bg: '#ffedd5', text: '#9a3412' }, { bg: '#fce7f3', text: '#9d174d' }, { bg: '#e0f2fe', text: '#075985' }, { bg: '#fef08a', text: '#854d0e' }, { bg: '#f3e8ff', text: '#6b21a8' } ];
 
-        let shoppingList = []; let fetchedRecipes = []; let favorites = []; let lastUserIntention = ""; 
+        let shoppingList = []; let fetchedRecipes = []; let favorites = []; let classicItems = []; let lastUserIntention = ""; 
         let currentPortions = 4; let currentRecipesCount = 3; 
 
-        // 2. Initialisation de Firebase (REMPLACE AVEC TES CLES)
+        // 2. Initialisation de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCY11bUQHlfHUcMr270LdgAQzd-RfZbJIs",
             authDomain: "gestion-courses-9187b.firebaseapp.com",
@@ -468,7 +496,7 @@
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const auth = firebase.auth(); // Ajout de l'Auth
+        const auth = firebase.auth(); 
 
         let userDocRef = null;
         let unsubscribeSnapshot = null;
@@ -476,35 +504,30 @@
         // --- GESTION DE L'AUTHENTIFICATION ---
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // Utilisateur connecté
                 document.getElementById('auth-screen').style.display = 'none';
-                
-                // On pointe vers LE document de cet utilisateur spécifique
                 userDocRef = db.collection("users").doc(user.uid);
 
-                // On écoute SES données en temps réel
                 unsubscribeSnapshot = userDocRef.onSnapshot((doc) => {
                     if (doc.exists) {
                         const data = doc.data();
                         shoppingList = data.shoppingList || [];
                         favorites = data.favorites || [];
+                        classicItems = data.classicItems || []; // Ajout des habitudes
                     } else {
-                        // C'est un nouveau compte, on initialise à vide
-                        shoppingList = []; favorites = [];
+                        shoppingList = []; favorites = []; classicItems = [];
                     }
                     renderApp();
                     renderFavorites();
+                    renderClassics(); // Affichage des habitudes
                 });
             } else {
-                // Utilisateur déconnecté
                 document.getElementById('auth-screen').style.display = 'flex';
-                if (unsubscribeSnapshot) unsubscribeSnapshot(); // On arrête d'écouter la base
-                shoppingList = []; favorites = [];
+                if (unsubscribeSnapshot) unsubscribeSnapshot(); 
+                shoppingList = []; favorites = []; classicItems = [];
                 renderApp();
             }
         });
 
-        // Fonctions pour les boutons de connexion/inscription
         async function handleLogin() {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
@@ -527,12 +550,109 @@
             }
         }
 
-        // --- SAUVEGARDE ---
+        // --- INTELLIGENCE DE CLASSEMENT ---
+        // --- 1. L'IA QUI DEVINERA LE RAYON TOUTE SEULE ---
+        async function askAICategory(itemName) {
+            const systemPrompt = `Tu es un assistant de liste de courses. Catégorise cet article : "${itemName}".
+Réponds UNIQUEMENT par l'une de ces catégories exactes, sans aucune autre phrase :
+Fruits & Légumes
+Produits Laitiers
+Viandes & Poissons
+Boulangerie
+Surgelés
+Boissons
+Hygiène & Entretien
+Bébé
+Petit déjeuner
+Féculents
+Épicerie salée
+Épicerie sucrée
+Plats cuisinés
+Maison & Jardin`
+Sauces & Condiments ;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
+                    method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }] })
+                });
+                const data = await response.json();
+                let category = data.candidates[0].content.parts[0].text.trim();
+                
+                // Sécurité : si l'IA invente un nom de rayon, on le met dans "Autres"
+                const valid = ["Fruits & Légumes", "Produits Laitiers", "Viandes & Poissons", "Boulangerie", "Surgelés", "Boissons", "Hygiène & Entretien", "Bébé", "Petit déjeuner", "Féculents", "Épicerie / Autres"];
+                return valid.includes(category) ? category : "Épicerie / Autres";
+            } catch (error) {
+                return "Épicerie / Autres";
+            }
+        }
+
+        // --- 2. L'AJOUT DANS LA LISTE DE COURSES (Avec IA) ---
+        async function addManualItem() {
+            const input = document.getElementById('manual-item-input');
+            const btn = input.nextElementSibling;
+            const itemName = input.value.trim();
+            if (itemName === "") return;
+
+            // On affiche un sablier pendant que l'IA réfléchit
+            const oldText = btn.innerText;
+            btn.innerText = "⏳";
+            btn.disabled = true;
+
+            const category = await askAICategory(itemName);
+
+            shoppingList.push({
+                id: Date.now() + Math.random().toString(),
+                name: itemName,
+                category: category,
+                checked: false,
+                sourceType: 'manual'
+            });
+
+            input.value = ""; 
+            btn.innerText = oldText;
+            btn.disabled = false;
+            
+            saveToFirebase(); 
+            renderApp(); 
+        }
+
+        function addManualItem() {
+            const input = document.getElementById('manual-item-input');
+            const itemName = input.value.trim();
+            if (itemName === "") return;
+
+            const category = guessCategory(itemName);
+
+            shoppingList.push({
+                id: Date.now() + Math.random().toString(),
+                name: itemName,
+                category: category,
+                checked: false,
+                sourceType: 'manual'
+            });
+
+            input.value = ""; 
+            saveToFirebase(); 
+            renderApp(); 
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const manualInput = document.getElementById('manual-item-input');
+            if (manualInput) {
+                manualInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') addManualItem();
+                });
+            }
+        });
+
+        // --- SAUVEGARDE GLOBALE ---
         function saveToFirebase() {
             if (userDocRef) {
                 userDocRef.set({
                     shoppingList: shoppingList,
-                    favorites: favorites
+                    favorites: favorites,
+                    classicItems: classicItems
                 }, { merge: true });
             }
         }
@@ -543,12 +663,14 @@
             return badgeColors[Math.abs(hash) % badgeColors.length];
         }
 
+        // --- NAVIGATION DES ONGLETS ---
         function switchTab(tabName) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`view-${tabName}`).classList.add('active');
             document.getElementById(`tab-${tabName}`).classList.add('active');
             if (tabName === 'favorites') renderFavorites();
+            if (tabName === 'classics') renderClassics();
         }
 
         function toggleFavorite(recipeId) {
@@ -559,20 +681,18 @@
             else favorites.push(recipe);
             displayGeneratedRecipes(fetchedRecipes);
             renderFavorites();
-
             saveToFirebase();
         }
+
         function renderFavorites() {
             const container = document.getElementById('favorites-container');
             container.innerHTML = '';
             
             if (favorites.length === 0) {
-                // Le message de favoris vides propre
                 container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;">Vous n'avez pas encore de favoris.<br><br>Cliquez sur le cœur 🤍 d'une recette pour l'ajouter ici.</div>`;
                 return;
             }
             favorites.forEach(recipe => {
-                // Affichage du prix par personne
                 const prixPers = recipe.budget_par_personne ? `${recipe.budget_par_personne}/pers.` : recipe.budget_moyen;
                 container.innerHTML += `
                     <div class="recipe-card" id="fav-card-${recipe.id}">
@@ -595,13 +715,130 @@
             });
         }
 
+        // --- GESTION DES HABITUDES (CLASSICS) ---
+        // --- 3. L'AJOUT DANS LES HABITUDES (Avec IA) ---
+        async function addClassicItem() {
+            const input = document.getElementById('classic-item-input');
+            const btn = input.nextElementSibling;
+            const itemName = input.value.trim();
+            if (itemName === "") return;
+
+            const oldText = btn.innerText;
+            btn.innerText = "⏳";
+            btn.disabled = true;
+
+            const category = await askAICategory(itemName);
+
+            // On sauvegarde l'article ET son rayon définitif !
+            classicItems.push({
+                name: itemName,
+                category: category
+            });
+
+            input.value = "";
+            btn.innerText = oldText;
+            btn.disabled = false;
+
+            saveToFirebase();
+            renderClassics();
+        }
+
+        // --- 4. AFFICHAGE DES HABITUDES ---
+        function renderClassics() {
+            const container = document.getElementById('classics-container');
+            if (!container) return; 
+            container.innerHTML = '';
+            
+            if (classicItems.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;">Aucun achat régulier enregistré.<br><br>Ajoutez vos basiques ici pour les retrouver facilement !</div>`;
+                return;
+            }
+
+            const grouped = {};
+            classicItems.forEach((itemObj, index) => {
+                // Rétrocompatibilité si d'anciens éléments sont encore de simples textes
+                const name = typeof itemObj === 'string' ? itemObj : itemObj.name;
+                const category = typeof itemObj === 'string' ? "Épicerie / Autres" : itemObj.category;
+
+                if (!grouped[category]) grouped[category] = [];
+                grouped[category].push({ name: name, originalIndex: index }); 
+            });
+
+            for (let rayon in grouped) {
+                const section = document.createElement('div');
+                section.className = 'rayon-section';
+                section.innerHTML = `<div class="rayon-title">${rayonIcons[rayon] || '🛒'} ${rayon}</div>`;
+                
+                const list = document.createElement('ul'); 
+                list.className = 'item-list';
+
+                grouped[rayon].forEach(itemObj => {
+                    const li = document.createElement('li');
+                    li.className = 'shopping-item'; 
+                    li.style.cursor = 'default'; 
+                    
+                    li.innerHTML = `
+                        <div class="item-left">
+                            <span class="item-name">${itemObj.name}</span>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <button onclick="addClassicToShoppingList(${itemObj.originalIndex}, this)" style="background: #e0e7ff; color: var(--primary-dark); border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; transition: background 0.2s;">+ Ajouter</button>
+                            <button class="btn-delete" onclick="removeClassicItem(${itemObj.originalIndex})">×</button>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+                
+                section.appendChild(list); 
+                container.appendChild(section);
+            }
+        }
+
+        function removeClassicItem(index) {
+            classicItems.splice(index, 1);
+            saveToFirebase();
+            renderClassics();
+        }
+
+        // --- 5. ENVOI DE L'HABITUDE VERS LA LISTE DE COURSES ---
+        function addClassicToShoppingList(index, btnElement) {
+            const item = classicItems[index];
+            const itemName = typeof item === 'string' ? item : item.name;
+            const category = typeof item === 'string' ? "Épicerie / Autres" : item.category;
+            
+            shoppingList.push({
+                id: Date.now() + Math.random().toString(),
+                name: itemName,
+                category: category, // Le rayon est déjà connu, c'est instantané !
+                checked: false,
+                sourceType: 'manual'
+            });
+            
+            saveToFirebase();
+            renderApp(); 
+            
+            const originalText = btnElement.innerText;
+            const originalBg = btnElement.style.background;
+            const originalColor = btnElement.style.color;
+            
+            btnElement.innerText = "✓ Ajouté";
+            btnElement.style.background = "#dcfce7";
+            btnElement.style.color = "#166534";
+            
+            setTimeout(() => {
+                btnElement.innerText = originalText;
+                btnElement.style.background = originalBg;
+                btnElement.style.color = originalColor;
+            }, 1000);
+        }
+        
+        // --- AFFICHAGE DE L'APPLICATION (COURSES) ---
         function renderApp() {
             const container = document.getElementById('list-container');
             const countLabel = document.getElementById('items-count');
             container.innerHTML = '';
 
             if (shoppingList.length === 0) {
-                // Le message de caddie vide propre
                 container.innerHTML = `<div style="text-align:center; color:#8d99ae; padding:60px 20px;"><span style="font-size:3rem;display:block;margin-bottom:10px;">🛒</span>Votre caddie est vide.</div>`;
                 countLabel.innerText = "0 article";
                 return;
@@ -657,9 +894,8 @@
             recipe.ingredients.forEach(ing => {
                 const baseName = normalizeString(ing.nom);
 
-                // --- NOUVEAUTÉ : On ignore le sel et le poivre pour la liste de courses ---
                 if (/\b(sel|poivre)\b/.test(baseName)) {
-                    return; // On arrête là pour cet ingrédient et on passe au suivant
+                    return; 
                 }
 
                 const parsedQte = parseFloat(String(ing.qte).replace(',', '.'));
@@ -701,7 +937,6 @@
         function handleCustomPrompt() { const input = document.getElementById('custom-prompt').value.trim(); if (input !== "") askAI(input); }
 
         async function askAI(userIntention) {
-            // Récupération des valeurs des inputs
             currentPortions = document.getElementById('portions').value || 4; 
             currentRecipesCount = document.getElementById('recipes-count').value || 3;
             
@@ -709,7 +944,6 @@
             document.getElementById('prompts-section').style.display = 'none';
             document.getElementById('recipes-container').innerHTML = `<div class="loader"><div class="spinner"></div>L'IA élabore vos ${currentRecipesCount} repas...</div>`;
 
-            // Le prompt système demande explicitement EXACTEMENT X recettes
             const systemPrompt = `Tu es un assistant culinaire français.
 L'utilisateur souhaite EXACTEMENT ${currentRecipesCount} recette(s) pour ${currentPortions} personne(s). Adapte bien les quantités.
 1. Pas de décimales pour les pièces.
@@ -744,7 +978,6 @@ Rayons STRICTEMENT : "Fruits & Légumes", "Produits Laitiers", "Boulangerie", "�
             if (recipeIndex === -1) return;
             document.getElementById(`recipe-card-${recipeId}`).innerHTML = `<div class="loader" style="padding: 20px 0;"><div class="spinner"></div>Changement en cours...</div>`;
 
-            // Ajout de "budget_par_personne"
             const systemPrompt = `Tu es un assistant culinaire français. Demande initiale : "${lastUserIntention}", pour ${currentPortions} personne(s). Il ne souhaite pas conserver la recette "${fetchedRecipes[recipeIndex].nom}". Génère UNE SEULE nouvelle recette différente. Adapte les quantités. Pas de décimales pour les pièces. Utilise gramme (g) ou Litre (L), jamais de ml. Tu peux utiliser des décimales pour les Litres (ex: 0.25 L).
 JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom", "emoji": "🥗", "temps_preparation": 15, "temps_cuisson": 20, "budget_par_personne": "3,50€", "portions": ${currentPortions}, "ingredients": [ {"nom": "Lait", "qte": "0.5", "unite": "L", "rayon": "Produits Laitiers"} ], "etapes": ["Laver les tomates."] } ] }`;
 
@@ -767,7 +1000,6 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                 container.innerHTML = ''; document.getElementById('btn-reset').style.display = 'block'; 
                 recipesArray.forEach(recipe => {
                     const isFav = favorites.some(f => f.id === recipe.id);
-                    // Affichage conditionnel du prix/personne
                     const prixPers = recipe.budget_par_personne ? `${recipe.budget_par_personne}/pers.` : recipe.budget_moyen;
                     
                     container.innerHTML += `
@@ -792,6 +1024,7 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                 });
             }
         }
+        
         function openRecipeDetails(recipeId) {
             const recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId);
             if (!recipe) return;
