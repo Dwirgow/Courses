@@ -1,6 +1,6 @@
 {
-  "name": "InspiToque",
-  "short_name": "InspiToque",
+  "name": "EasyCourses",
+  "short_name": "EasyCourses",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f7fb",
