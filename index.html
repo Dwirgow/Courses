@@ -2,7 +2,7 @@
 <html lang="fr">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script> ```
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <head>
     <meta charset="UTF-8">
@@ -94,7 +94,7 @@
             align-items: center;
             position: relative; /* Permet d'épingler le logo par rapport à ce conteneur */
             min-height: 65px; /* S'assure que le bandeau est assez haut pour le logo */
-	    margin-top: 15px;
+	    margin-top: 25px;
         }
         
         .header-logo-large {
@@ -318,8 +318,7 @@
 
         <!-- ONGLET 1 : COURSES -->
         <div id="view-list" class="view active">
-            <div class="view-content" id="list-container"></div>
-            <div class="footer-controls">
+            <div class="view-content" id="list-container"></div> <div class="footer-controls">
                 <span id="items-count">0 article(s)</span>
                 <div class="footer-buttons">
                     <button class="btn-clear-checked" onclick="clearChecked()">Nettoyer</button>
@@ -370,9 +369,8 @@
         <!-- ONGLET 3 : FAVORIS -->
         <div id="view-favorites" class="view">
             <div class="view-content">
-                <h3 style="margin-bottom:15px; font-size:1.1rem;">❤️ Vos recettes préférées</h3>
-                <div id="favorites-container" class="recipe-list"></div>
-            </div>
+                <h3 style="margin-bottom:15px; font-size:1.1rem; text-align: center;">❤️ Vos recettes préférées</h3>
+                <div id="favorites-container" class="recipe-list"></div> </div>
         </div>
 
         <!-- BARRE DE NAVIGATION -->
@@ -527,8 +525,10 @@
         function renderFavorites() {
             const container = document.getElementById('favorites-container');
             container.innerHTML = '';
+            
             if (favorites.length === 0) {
-                container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;">Vous n'avez pas encore de favoris. Cliquez sur le cœur 🤍 d'une recette pour l'ajouter ici.</div>`;
+                // Le message de favoris vides propre
+                container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;">Vous n'avez pas encore de favoris.<br><br>Cliquez sur le cœur 🤍 d'une recette pour l'ajouter ici.</div>`;
                 return;
             }
             favorites.forEach(recipe => {
@@ -561,6 +561,7 @@
             container.innerHTML = '';
 
             if (shoppingList.length === 0) {
+                // Le message de caddie vide propre
                 container.innerHTML = `<div style="text-align:center; color:#8d99ae; padding:60px 20px;"><span style="font-size:3rem;display:block;margin-bottom:10px;">🛒</span>Votre caddie est vide.</div>`;
                 countLabel.innerText = "0 article";
                 return;
