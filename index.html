@@ -44,24 +44,27 @@
     /* Fond global premium avec dégradé subtil */
     body {
         background: linear-gradient(135deg, #c7d2fe 0%, #e0e7ff 40%, #fbcfe8 100%);
-        background-attachment: fixed; /* Empêche le fond de bouger au défilement */
+        background-attachment: fixed;
         color: var(--text-main);
         display: flex; justify-content: center; align-items: center;
         margin: 0; padding: 0;
-        height: 100dvh; overflow: hidden;
+        height: 100dvh; width: 100vw; /* Sécurise la largeur totale */
+        overflow: hidden;
     }
 
-    /* On force l'application à être transparente sur mobile */
+    /* Conteneur principal - 100% de l'écran sur mobile ! */
     .app-container {
-        width: 100%; max-width: 480px; 
+        width: 100%; 
+        max-width: 100%; /* <-- C'est ici que l'on libère la largeur totale */
         background: transparent !important; 
         display: flex; flex-direction: column;
         height: 100%; position: relative;
     }
 
-    /* Le fond redevient blanc uniquement si on est sur un ordinateur/tablette */
+    /* Le format "téléphone" s'active uniquement sur les grands écrans (PC/Tablette) */
     @media (min-width: 500px) {
         .app-container {
+            max-width: 480px; /* <-- On remet la limite de largeur ici */
             height: 95dvh; border-radius: 24px;
             background: #ffffff !important; 
             box-shadow: var(--shadow-lg);
@@ -70,16 +73,58 @@
         }
     }
     header {
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        color: white; 
-        padding: env(safe-area-inset-top, 25px) 20px 20px 20px; 
-        text-align: center; 
-        flex-shrink: 0;
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
-        z-index: 5;
-    }
-    header h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
-    header p { font-size: 0.85rem; opacity: 0.9; font-weight: 500; }
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; 
+            padding: env(safe-area-inset-top, 25px) 20px 20px 20px; 
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+            z-index: 5;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            position: relative; /* Permet d'épingler le logo par rapport à ce conteneur */
+            min-height: 65px; /* S'assure que le bandeau est assez haut pour le logo */
+        }
+        
+        .header-logo-large {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%); /* Centre le logo verticalement tout à gauche */
+            width: 65px; 
+            height: 65px;
+            border-radius: 16px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25); 
+            object-fit: cover;
+            background-color: white; 
+        }
+        
+        .header-text {
+            text-align: center; /* Centre le texte */
+            width: 100%; /* Prend toute la largeur pour garantir un centrage parfait */
+            padding: 0 75px; /* Sécurité : empêche le texte de passer sous le logo sur les petits écrans */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .header-text h1 { 
+            font-size: 1.7rem; 
+            font-weight: 800; 
+            letter-spacing: -0.5px; 
+            margin: 0 0 4px 0; 
+        }
+        
+        .header-text p { 
+            font-size: 0.85rem; 
+            opacity: 0.9; 
+            font-weight: 500; 
+            margin: 0; 
+        }
+        header h1 { font-size: 1.5rem; margin: 0; }
+        header p { font-size: 0.85rem; opacity: 0.9; margin: 0;}
 
     .view { display: none; flex-direction: column; flex: 1; overflow: hidden; background: transparent !important; }
     .view.active { display: flex; animation: fadeIn 0.3s ease-in-out; background: transparent !important; }
@@ -94,7 +139,8 @@
         backdrop-filter: blur(10px);
         border-top: 1px solid var(--border-color); 
         position: absolute; 
-        bottom: 0; 
+        bottom: 0;
+	left: 0;
         width: 100%; 
         z-index: 10;
         padding-bottom: env(safe-area-inset-bottom, 0);
@@ -251,8 +297,13 @@
     </div>
     <div class="app-container">
         <header>
-            <h1>InspiToque</h1>
-            <p>Organisation des repas & courses</p>
+            <div class="header-content">
+                <img src="icon.png" alt="Logo InspiToque" class="header-logo-large">
+                <div class="header-text">
+                    <h1>InspiToque</h1>
+                    <p>Organisation des repas & courses</p>
+                </div>
+            </div>
         </header>
 
         <!-- ONGLET 1 : COURSES -->
