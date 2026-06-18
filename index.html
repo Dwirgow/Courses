@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="fr">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script> ```
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CaddieClair</title>
+    <title>InspiToque</title>
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -39,43 +43,32 @@
 
     /* Fond global premium avec dégradé subtil */
     body {
-        background-color: #f8fafc;
-        background-image: 
-            radial-gradient(at 0% 0%, hsla(230, 100%, 85%, 0.4) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, hsla(190, 100%, 85%, 0.4) 0px, transparent 50%);
-        background-attachment: fixed;
+        background: linear-gradient(135deg, #c7d2fe 0%, #e0e7ff 40%, #fbcfe8 100%);
+        background-attachment: fixed; /* Empêche le fond de bouger au défilement */
         color: var(--text-main);
-        display: flex; 
-        justify-content: center; 
-        align-items: center;
-        margin: 0; 
-        padding: 0;
-        height: 100dvh;
-        overflow: hidden;
+        display: flex; justify-content: center; align-items: center;
+        margin: 0; padding: 0;
+        height: 100dvh; overflow: hidden;
     }
 
-    /* Conteneur principal façon "Mockup de téléphone" sur PC */
+    /* On force l'application à être transparente sur mobile */
     .app-container {
-        width: 100%; 
-        max-width: 480px; 
-        background: var(--card-bg);
-        display: flex; 
-        flex-direction: column;
-        height: 100%; 
-        position: relative;
-        box-shadow: var(--shadow-lg);
+        width: 100%; max-width: 480px; 
+        background: transparent !important; 
+        display: flex; flex-direction: column;
+        height: 100%; position: relative;
     }
 
-    /* Ajout de bords arrondis sur les écrans plus larges (PC/Tablette) */
+    /* Le fond redevient blanc uniquement si on est sur un ordinateur/tablette */
     @media (min-width: 500px) {
         .app-container {
-            height: 95dvh;
-            border-radius: 24px;
+            height: 95dvh; border-radius: 24px;
+            background: #ffffff !important; 
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.5);
         }
     }
-
     header {
         background: linear-gradient(135deg, var(--primary), var(--primary-dark));
         color: white; 
@@ -88,8 +81,8 @@
     header h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
     header p { font-size: 0.85rem; opacity: 0.9; font-weight: 500; }
 
-    .view { display: none; flex-direction: column; flex: 1; overflow: hidden; background: #f8fafc; }
-    .view.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
+    .view { display: none; flex-direction: column; flex: 1; overflow: hidden; background: transparent !important; }
+    .view.active { display: flex; animation: fadeIn 0.3s ease-in-out; background: transparent !important; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     
     .view-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; }
@@ -245,6 +238,17 @@
 </style>
 </head>
 <body>
+    <div id="auth-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
+        <h1 style="color: var(--primary); font-size: 2rem; margin-bottom: 10px;">InspiToque</h1>
+        <p style="color: var(--text-muted); margin-bottom: 30px;">Connectez-vous pour voir vos courses</p>
+        
+        <input type="email" id="auth-email" placeholder="Adresse e-mail" style="width: 100%; max-width: 300px; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 1rem;">
+        <input type="password" id="auth-password" placeholder="Mot de passe" style="width: 100%; max-width: 300px; padding: 14px; margin-bottom: 20px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 1rem;">
+        
+        <button onclick="handleLogin()" style="width: 100%; max-width: 300px; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; margin-bottom: 10px; cursor: pointer;">Se connecter</button>
+        <button onclick="handleSignup()" style="width: 100%; max-width: 300px; background: white; color: var(--primary); border: 2px solid var(--primary); padding: 14px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer;">Créer un compte</button>
+        <div id="auth-error" style="color: var(--danger); margin-top: 15px; font-size: 0.9rem; text-align: center;"></div>
+    </div>
     <div class="app-container">
         <header>
             <h1>InspiToque</h1>
@@ -268,20 +272,34 @@
             <div class="view-content">
                 <button id="btn-reset" class="btn-reset" onclick="resetRecipes()">🔄 Nouvelle recherche</button>
                 <div id="prompts-section">
-                    <div class="portions-bar">
-                        <label for="portions">👥 Nombre de personnes :</label>
-                        <input type="number" id="portions" class="portions-input" value="2" min="1" max="20">
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <div style="flex: 1; background: white; padding: 12px 14px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;">
+                            <label for="recipes-count" style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">🍽️ Plats :</label>
+                            <input type="number" id="recipes-count" class="portions-input" value="3" min="1" max="14" style="width: 50px; padding: 6px; font-size: 1rem;">
+                        </div>
+                        <div style="flex: 1; background: white; padding: 12px 14px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;">
+                            <label for="portions" style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">👥 Pers :</label>
+                            <input type="number" id="portions" class="portions-input" value="4" min="1" max="20" style="width: 50px; padding: 6px; font-size: 1rem;">
+                        </div>
                     </div>
+
                     <div class="custom-search-bar">
                         <input type="text" id="custom-prompt" class="custom-search-input" placeholder="Ex: Une recette de boeuf bourguignon..." onkeypress="handleEnter(event)">
                         <button class="btn-search" onclick="handleCustomPrompt()">Chercher</button>
                     </div>
                     <h3 style="margin-bottom:15px; font-size:0.95rem; color: var(--text-muted); text-align: center;">Ou choisissez une inspiration rapide :</h3>
+                    
                     <div class="ai-prompts-grid">
-                        <button class="prompt-btn" onclick="askAI('5 recettes saines, équilibrées et variées.')"><span class="prompt-emoji">🥗</span> 5 repas équilibrés</button>
-                        <button class="prompt-btn" onclick="askAI('1 recette très gourmande (burger, pizza, fromage).')"><span class="prompt-emoji">🍔</span> 1 plat gourmand</button>
-                        <button class="prompt-btn" onclick="askAI('3 recettes express prêtes en 15 minutes.')"><span class="prompt-emoji">⏱️</span> 3 plats express</button>
-                        <button class="prompt-btn" onclick="askAI('3 recettes 100% végétariennes, riches en protéines.')"><span class="prompt-emoji">🌱</span> 3 repas végétariens</button>
+                        <button class="prompt-btn" onclick="askAI('Des plats économiques à moins de 5 euros par personne.')"><span class="prompt-emoji">💶</span> Moins de 5€/pers</button>
+                        <button class="prompt-btn" onclick="askAI('Des recettes saines, équilibrées et variées.')"><span class="prompt-emoji">🥗</span> Repas équilibrés</button>
+                        <button class="prompt-btn" onclick="askAI('Des recettes anti-gaspi pour vider le frigo et les restes.')"><span class="prompt-emoji">♻️</span> Anti-gaspi</button>
+                        <button class="prompt-btn" onclick="askAI('Des idées de repas parfaits pour préparer en avance (batch cooking).')"><span class="prompt-emoji">🍱</span> Batch cooking</button>
+                        <button class="prompt-btn" onclick="askAI('Des repas légers et digestes, parfaits pour le soir.')"><span class="prompt-emoji">🌙</span> Repas du soir</button>
+                        <button class="prompt-btn" onclick="askAI('Des recettes express prêtes en 15 minutes top chrono.')"><span class="prompt-emoji">⏱️</span> Plats express</button>
+                        <button class="prompt-btn" onclick="askAI('Des plats familiaux réconfortants et conviviaux.')"><span class="prompt-emoji">🥘</span> Plats familiaux</button>
+                        <button class="prompt-btn" onclick="askAI('Des recettes à base de poisson ou de fruits de mer.')"><span class="prompt-emoji">🐟</span> Recettes de la mer</button>
+                        <button class="prompt-btn" onclick="askAI('Des recettes très gourmandes (burger, pizza, plat au fromage).')"><span class="prompt-emoji">🍔</span> Plats gourmands</button>
+                        <button class="prompt-btn" onclick="askAI('Des recettes 100% végétariennes, riches en protéines.')"><span class="prompt-emoji">🌱</span> Repas végétariens</button>
                     </div>
                 </div>
                 <div id="recipes-container" class="recipe-list"></div>
@@ -336,7 +354,89 @@
         const rayonIcons = { 'Fruits & Légumes': '🥦', 'Produits Laitiers': '🥛', 'Boulangerie': '🥖', 'Épicerie': '📦', 'Boucherie & Poissonnerie': '🥩', 'Entretien & Maison': '🧼', 'Divers / Autre': '🛒' };
         const badgeColors = [ { bg: '#e0e7ff', text: '#4f46e5' }, { bg: '#dcfce7', text: '#166534' }, { bg: '#ffedd5', text: '#9a3412' }, { bg: '#fce7f3', text: '#9d174d' }, { bg: '#e0f2fe', text: '#075985' }, { bg: '#fef08a', text: '#854d0e' }, { bg: '#f3e8ff', text: '#6b21a8' } ];
 
-        let shoppingList = []; let fetchedRecipes = []; let favorites = []; let lastUserIntention = ""; let currentPortions = 2; 
+        let shoppingList = []; let fetchedRecipes = []; let favorites = []; let lastUserIntention = ""; 
+        let currentPortions = 4; let currentRecipesCount = 3; 
+
+        // 2. Initialisation de Firebase (REMPLACE AVEC TES CLES)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCY11bUQHlfHUcMr270LdgAQzd-RfZbJIs",
+            authDomain: "gestion-courses-9187b.firebaseapp.com",
+            projectId: "gestion-courses-9187b",
+            storageBucket: "gestion-courses-9187b.firebasestorage.app",
+            messagingSenderId: "949150982051",
+            appId: "1:949150982051:web:3e36ab672cd4905ba58416"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth(); // Ajout de l'Auth
+
+        let userDocRef = null;
+        let unsubscribeSnapshot = null;
+
+        // --- GESTION DE L'AUTHENTIFICATION ---
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Utilisateur connecté
+                document.getElementById('auth-screen').style.display = 'none';
+                
+                // On pointe vers LE document de cet utilisateur spécifique
+                userDocRef = db.collection("users").doc(user.uid);
+
+                // On écoute SES données en temps réel
+                unsubscribeSnapshot = userDocRef.onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        shoppingList = data.shoppingList || [];
+                        favorites = data.favorites || [];
+                    } else {
+                        // C'est un nouveau compte, on initialise à vide
+                        shoppingList = []; favorites = [];
+                    }
+                    renderApp();
+                    renderFavorites();
+                });
+            } else {
+                // Utilisateur déconnecté
+                document.getElementById('auth-screen').style.display = 'flex';
+                if (unsubscribeSnapshot) unsubscribeSnapshot(); // On arrête d'écouter la base
+                shoppingList = []; favorites = [];
+                renderApp();
+            }
+        });
+
+        // Fonctions pour les boutons de connexion/inscription
+        async function handleLogin() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            try {
+                document.getElementById('auth-error').innerText = "";
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                document.getElementById('auth-error').innerText = "Erreur : email ou mot de passe incorrect.";
+            }
+        }
+
+        async function handleSignup() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            try {
+                document.getElementById('auth-error').innerText = "";
+                await auth.createUserWithEmailAndPassword(email, password);
+            } catch (error) {
+                document.getElementById('auth-error').innerText = "Erreur : " + error.message;
+            }
+        }
+
+        // --- SAUVEGARDE ---
+        function saveToFirebase() {
+            if (userDocRef) {
+                userDocRef.set({
+                    shoppingList: shoppingList,
+                    favorites: favorites
+                }, { merge: true });
+            }
+        }
 
         function getColorForRecipe(recipeName) {
             let hash = 0;
@@ -360,8 +460,9 @@
             else favorites.push(recipe);
             displayGeneratedRecipes(fetchedRecipes);
             renderFavorites();
-        }
 
+            saveToFirebase();
+        }
         function renderFavorites() {
             const container = document.getElementById('favorites-container');
             container.innerHTML = '';
@@ -370,6 +471,8 @@
                 return;
             }
             favorites.forEach(recipe => {
+                // Affichage du prix par personne
+                const prixPers = recipe.budget_par_personne ? `${recipe.budget_par_personne}/pers.` : recipe.budget_moyen;
                 container.innerHTML += `
                     <div class="recipe-card" id="fav-card-${recipe.id}">
                         <button class="btn-heart" onclick="toggleFavorite(${recipe.id})">❤️</button>
@@ -379,7 +482,7 @@
                                 <h4>${recipe.nom}</h4>
                                 <div class="recipe-stats">
                                     <span>🔪 ${recipe.temps_preparation} min • 🔥 ${recipe.temps_cuisson} min</span>
-                                    <span>👨‍🍳 ${recipe.portions} pers.</span>
+                                    <span>💰 ${prixPers} • 👨‍🍳 ${recipe.portions} pers.</span>
                                 </div>
                             </div>
                         </div>
@@ -437,10 +540,10 @@
             countLabel.innerText = `${shoppingList.filter(i => !i.checked).length} restant(s)`;
         }
 
-        function toggleCheckItem(id) { shoppingList = shoppingList.map(i => i.id === id ? { ...i, checked: !i.checked } : i); renderApp(); }
-        function deleteItem(id) { shoppingList = shoppingList.filter(i => i.id !== id); renderApp(); }
-        function clearChecked() { shoppingList = shoppingList.filter(i => !i.checked); renderApp(); }
-        function clearAll() { if(confirm("Vider tout le panier ?")) { shoppingList = []; renderApp(); } }
+        function toggleCheckItem(id) { shoppingList = shoppingList.map(i => i.id === id ? { ...i, checked: !i.checked } : i); renderApp(); saveToFirebase(); }      
+        function deleteItem(id) { shoppingList = shoppingList.filter(i => i.id !== id); renderApp(); saveToFirebase(); }
+        function clearChecked() { shoppingList = shoppingList.filter(i => !i.checked); renderApp(); saveToFirebase(); }
+        function clearAll() { if(confirm("Vider tout le panier ?")) { shoppingList = []; renderApp(); saveToFirebase(); } }
         function normalizeString(str) { return str ? str.toLowerCase().trim().replace(/s$/, '') : ""; }
 
         function addRecipeToCart(recipeId, source = 'main') {
@@ -450,8 +553,14 @@
             const btn = document.getElementById(btnId);
 
             recipe.ingredients.forEach(ing => {
-                const parsedQte = parseFloat(String(ing.qte).replace(',', '.'));
                 const baseName = normalizeString(ing.nom);
+
+                // --- NOUVEAUTÉ : On ignore le sel et le poivre pour la liste de courses ---
+                if (/\b(sel|poivre)\b/.test(baseName)) {
+                    return; // On arrête là pour cet ingrédient et on passe au suivant
+                }
+
+                const parsedQte = parseFloat(String(ing.qte).replace(',', '.'));
                 const baseUnit = normalizeString(ing.unite);
 
                 let existingItem = null;
@@ -476,7 +585,8 @@
             });
 
             if(btn) { btn.innerHTML = "✅ Ajouté"; btn.classList.add("added"); }
-            renderApp(); 
+            renderApp();
+            saveToFirebase();
         }
 
         function resetRecipes() {
@@ -489,16 +599,22 @@
         function handleCustomPrompt() { const input = document.getElementById('custom-prompt').value.trim(); if (input !== "") askAI(input); }
 
         async function askAI(userIntention) {
-            currentPortions = document.getElementById('portions').value || 2; lastUserIntention = userIntention; 
+            // Récupération des valeurs des inputs
+            currentPortions = document.getElementById('portions').value || 4; 
+            currentRecipesCount = document.getElementById('recipes-count').value || 3;
+            
+            lastUserIntention = userIntention; 
             document.getElementById('prompts-section').style.display = 'none';
-            document.getElementById('recipes-container').innerHTML = `<div class="loader"><div class="spinner"></div>L'IA élabore vos repas...</div>`;
+            document.getElementById('recipes-container').innerHTML = `<div class="loader"><div class="spinner"></div>L'IA élabore vos ${currentRecipesCount} repas...</div>`;
 
+            // Le prompt système demande explicitement EXACTEMENT X recettes
             const systemPrompt = `Tu es un assistant culinaire français.
-L'utilisateur souhaite des recettes pour ${currentPortions} personne(s). Adapte bien les quantités.
+L'utilisateur souhaite EXACTEMENT ${currentRecipesCount} recette(s) pour ${currentPortions} personne(s). Adapte bien les quantités.
 1. Pas de décimales pour les pièces.
-2. Utilise "gramme" (g) ou "millilitre" (ml). Jamais kg ou L.
+2. Utilise "gramme" (g) ou "Litre" (L). N'utilise JAMAIS de millilitres (ml) ou centilitres (cl). Tu peux utiliser des décimales pour les Litres (ex: 0.2 L).
 Sinon, tu dois OBLIGATOIREMENT répondre avec un objet JSON strict correspondant à ce format exact :
-{ "recipes": [ { "id": 1, "nom": "Nom", "emoji": "🥗", "temps_preparation": 15, "temps_cuisson": 20, "budget_moyen": "12€", "portions": ${currentPortions}, "ingredients": [ {"nom": "Tomate", "qte": "2", "unite": "pièces", "rayon": "Fruits & Légumes"} ], "etapes": [ "Laver." ] } ] }
+{ "recipes": [ { "id": 1, "nom": "Nom", "emoji": "🥗", "temps_preparation": 15, "temps_cuisson": 20, "budget_par_personne": "3,50€", "portions": ${currentPortions}, "ingredients": [ {"nom": "Tomate", "qte": "2", "unite": "pièces", "rayon": "Fruits & Légumes"} ], "etapes": [ "Laver." ] } ] }
+Assure-toi que le tableau "recipes" contienne exactement ${currentRecipesCount} éléments.
 Rayons STRICTEMENT : "Fruits & Légumes", "Produits Laitiers", "Boulangerie", "Épicerie", "Boucherie & Poissonnerie", "Entretien & Maison", "Divers / Autre".`;
 
             try {
@@ -526,8 +642,9 @@ Rayons STRICTEMENT : "Fruits & Légumes", "Produits Laitiers", "Boulangerie", "�
             if (recipeIndex === -1) return;
             document.getElementById(`recipe-card-${recipeId}`).innerHTML = `<div class="loader" style="padding: 20px 0;"><div class="spinner"></div>Changement en cours...</div>`;
 
-            const systemPrompt = `Tu es un assistant culinaire français. Demande initiale : "${lastUserIntention}", pour ${currentPortions} personne(s). Il ne souhaite pas conserver la recette "${fetchedRecipes[recipeIndex].nom}". Génère UNE SEULE nouvelle recette différente. Adapte les quantités. Pas de décimales pour les pièces. Utilise gramme/ml.
-JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom", "emoji": "🥗", "temps_preparation": 15, "temps_cuisson": 20, "budget_moyen": "12€", "portions": ${currentPortions}, "ingredients": [ {"nom": "Tomate", "qte": "2", "unite": "pièces", "rayon": "Fruits & Légumes"} ], "etapes": ["Laver les tomates."] } ] }`;
+            // Ajout de "budget_par_personne"
+            const systemPrompt = `Tu es un assistant culinaire français. Demande initiale : "${lastUserIntention}", pour ${currentPortions} personne(s). Il ne souhaite pas conserver la recette "${fetchedRecipes[recipeIndex].nom}". Génère UNE SEULE nouvelle recette différente. Adapte les quantités. Pas de décimales pour les pièces. Utilise gramme (g) ou Litre (L), jamais de ml. Tu peux utiliser des décimales pour les Litres (ex: 0.25 L).
+JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom", "emoji": "🥗", "temps_preparation": 15, "temps_cuisson": 20, "budget_par_personne": "3,50€", "portions": ${currentPortions}, "ingredients": [ {"nom": "Lait", "qte": "0.5", "unite": "L", "rayon": "Produits Laitiers"} ], "etapes": ["Laver les tomates."] } ] }`;
 
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
@@ -548,6 +665,9 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                 container.innerHTML = ''; document.getElementById('btn-reset').style.display = 'block'; 
                 recipesArray.forEach(recipe => {
                     const isFav = favorites.some(f => f.id === recipe.id);
+                    // Affichage conditionnel du prix/personne
+                    const prixPers = recipe.budget_par_personne ? `${recipe.budget_par_personne}/pers.` : recipe.budget_moyen;
+                    
                     container.innerHTML += `
                         <div class="recipe-card" id="recipe-card-${recipe.id}">
                             <button class="btn-heart" onclick="toggleFavorite(${recipe.id})">${isFav ? '❤️' : '🤍'}</button>
@@ -557,7 +677,7 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                                     <h4>${recipe.nom}</h4>
                                     <div class="recipe-stats">
                                         <span>🔪 Prép: ${recipe.temps_preparation} min • 🔥 Cuis: ${recipe.temps_cuisson} min</span>
-                                        <span>💰 ${recipe.budget_moyen} • 👨‍🍳 ${recipe.portions} pers.</span>
+                                        <span>💰 ${prixPers} • 👨‍🍳 ${recipe.portions} pers.</span>
                                     </div>
                                 </div>
                             </div>
@@ -570,7 +690,6 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                 });
             }
         }
-
         function openRecipeDetails(recipeId) {
             const recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId);
             if (!recipe) return;
