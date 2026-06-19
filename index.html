@@ -42,7 +42,6 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
     }
 
-    /* Fond d'écran global */
     body {
         background: linear-gradient(135deg, #c7d2fe 0%, #e0e7ff 40%, #fbcfe8 100%);
         background-attachment: fixed;
@@ -53,7 +52,6 @@
         overflow: hidden;
     }
 
-    /* FORCER LE PLEIN ÉCRAN SUR MOBILE */
     .app-container {
         position: absolute; 
         top: 0; left: 0; right: 0; bottom: 0;
@@ -64,7 +62,6 @@
         overflow-x: hidden; 
     }
 
-    /* Retour au mode centré "téléphone virtuel" sur Ordinateur */
     @media (min-width: 500px) {
         .app-container {
             position: relative; 
@@ -82,9 +79,9 @@
     header {
         background: linear-gradient(135deg, var(--primary), var(--primary-dark));
         color: white; 
-        padding: env(safe-area-inset-top, 15px) 15px 15px 15px; 
+        padding: env(safe-area-inset-top, 8px) 12px 8px 12px !important;
         flex-shrink: 0;
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        box-shadow: 0 2px 10px rgba(99, 102, 241, 0.15);
         z-index: 5;
         width: 100%;
         box-sizing: border-box;
@@ -94,8 +91,8 @@
         display: flex;
         align-items: center;
         position: relative; 
-        min-height: 50px; 
-        margin-top: 5px; 
+        min-height: 35px !important; 
+        margin-top: 2px !important; 
     }
 
     .header-logo-large {
@@ -103,10 +100,10 @@
         left: 0;
         top: 50%;
         transform: translateY(-50%);
-        width: 50px;  
-        height: 50px; 
-        border-radius: 12px; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.25); 
+        width: 35px !important;  
+        height: 35px !important; 
+        border-radius: 8px !important; 
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2); 
         object-fit: cover;
         background-color: white; 
     }
@@ -114,7 +111,7 @@
     .header-text {
         text-align: center; 
         width: 100%; 
-        padding: 0 75px; 
+        padding: 0 45px !important; 
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -122,18 +119,18 @@
     
     .header-text h1 { 
         font-family: 'Pacifico', cursive;
-        font-size: 2rem; 
+        font-size: 1.4rem !important; 
         font-weight: normal; 
-        letter-spacing: 1.2px; 
-        margin: 0 0 4px 0; 
+        letter-spacing: 0.8px; 
+        margin: 0 !important; 
     }
     
     .header-text p { 
         font-family: 'Fredoka', sans-serif;
-        font-size: 0.85rem; 
+        font-size: 0.75rem !important; 
         opacity: 0.9; 
         font-weight: normal; 
-        letter-spacing: 1.2px;
+        letter-spacing: 0.8px;
         margin: 0; 
     }
 
@@ -141,9 +138,12 @@
     .view.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     
-    .view-content { flex: 1; overflow-y: auto; overflow-x: hidden; width: 100%; box-sizing: border-box; padding: 20px; padding-bottom: 90px; }
+    .view-content { 
+        flex: 1; overflow-y: auto; overflow-x: hidden; width: 100%; box-sizing: border-box; 
+        padding: 10px !important; 
+        padding-bottom: 105px !important; 
+    }
 
-    /* Barre de navigation modernisée */
     .bottom-nav { 
         display: flex; 
         background: rgba(255, 255, 255, 0.95); 
@@ -157,45 +157,78 @@
         z-index: 10;
         padding-bottom: env(safe-area-inset-bottom, 0);
     }
+    
     .nav-btn {
-        flex: 1; padding: 14px 10px; border: none; background: transparent;
-        font-size: 0.85rem; font-weight: 600; color: var(--text-muted); cursor: pointer;
-        display: flex; flex-direction: column; align-items: center; gap: 6px;
+        flex: 1; 
+        padding: 6px 10px !important; 
+        border: none; background: transparent;
+        font-size: 0.72rem !important; 
+        font-weight: 600; color: var(--text-muted); cursor: pointer;
+        display: flex; flex-direction: column; align-items: center; gap: 2px !important;
         transition: all 0.2s ease;
     }
-    .nav-btn span { font-size: 1.3rem; transition: transform 0.2s ease; }
+    
+    .nav-btn span { font-size: 1.1rem !important; transition: transform 0.2s ease; }
     .nav-btn:hover span { transform: scale(1.1); }
     .nav-btn.active { color: var(--primary); }
     .nav-btn.active span { transform: translateY(-2px); }
     .nav-btn::after {
         content: ''; width: 0; height: 3px; background: var(--primary); 
-        border-radius: 3px; margin-top: 4px; transition: width 0.3s ease;
+        border-radius: 3px; margin-top: 2px !important; transition: width 0.3s ease;
     }
     .nav-btn.active::after { width: 30%; }
 
     /* --- COURSES --- */
-    .rayon-section { margin-bottom: 24px; }
-    .rayon-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; font-weight: 700; padding-left: 5px; }
-    .item-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .rayon-section { margin-bottom: 10px !important; }
+    
+    .rayon-title { 
+        font-size: 0.72rem !important; 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px; 
+        color: var(--text-muted); 
+        margin-bottom: 5px !important; 
+        font-weight: 700; 
+        padding-left: 2px !important; 
+    }
+    
+    .item-list { list-style: none; display: flex; flex-direction: column; gap: 4px !important; }
+    
     .shopping-item { 
         display: flex; justify-content: space-between; align-items: center;
         background: white; 
-        padding: 10px 14px; /* Marges internes réduites pour un encadré plus fin */
-        border-radius: 12px; /* Coins légèrement moins arrondis pour aller avec la nouvelle taille */
+        padding: 6px 10px !important; 
+        border-radius: 8px !important; 
         border: 1px solid var(--border-color); cursor: pointer;
         box-shadow: var(--shadow-sm); transition: all 0.2s ease;
     }
+    
     .shopping-item:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); border-color: #cbd5e1; }
-    .item-left { display: flex; align-items: center; gap: 14px; flex: 1; }
-    .checkbox { width: 24px; height: 24px; border: 2px solid #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+    
+    .item-left { display: flex; align-items: center; gap: 10px !important; flex: 1; }
+    
+    .checkbox { 
+        width: 20px !important; 
+        height: 20px !important; 
+        border: 2px solid #cbd5e1; 
+        border-radius: 6px !important; 
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; 
+    }
+    
     .shopping-item.checked { opacity: 0.6; background: #f1f5f9; box-shadow: none; border-color: transparent; transform: none; }
     .shopping-item.checked .item-name { text-decoration: line-through; color: var(--text-muted); }
     .shopping-item.checked .checkbox { background: var(--primary); border-color: var(--primary); }
-    .shopping-item.checked .checkbox::after { content: "✓"; color: white; font-size: 0.9rem; font-weight: bold; }
-    .item-name { font-weight: 600; font-size: 0.95rem; color: var(--text-main); }
-    .sources-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .shopping-item.checked .checkbox::after { content: "✓"; color: white; font-size: 0.8rem !important; font-weight: bold; }
+    
+    .item-name { font-weight: 600; font-size: 0.88rem !important; color: var(--text-main); }
+    
+    .sources-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
     .item-source { font-size: 0.65rem; padding: 4px 8px; border-radius: 6px; font-weight: 700; display: inline-block; white-space: nowrap; }
-    .btn-delete { background: transparent; border: none; color: #cbd5e1; font-size: 1.4rem; cursor: pointer; padding: 5px; transition: color 0.2s; }
+    
+    .btn-delete { 
+        background: transparent; border: none; color: #cbd5e1; 
+        font-size: 1.15rem !important; 
+        cursor: pointer; padding: 2px 4px !important; transition: color 0.2s; 
+    }
     .btn-delete:hover { color: var(--danger); }
     
     .footer-controls {
@@ -203,15 +236,21 @@
         justify-content: space-between; 
         align-items: center;
         background: rgba(255, 255, 255, 0.95);
-        padding: 15px 20px; /* Ajusté pour plus d'harmonie */
+        padding: 8px 12px !important; 
         border-top: 1px solid var(--border-color);
-        margin-bottom: 70px; 
+        margin-bottom: 42px !important; 
         position: relative;
         z-index: 5;
     }
 
-    .footer-buttons { display: flex; gap: 10px; }
-    .btn-clear-checked, .btn-clear-all { padding: 8px 12px; border-radius: 8px; border: none; font-weight: bold; font-size: 0.85rem; cursor: pointer; font-family: 'Fredoka', sans-serif;}
+    .footer-buttons { display: flex; gap: 6px !important; }
+    
+    .btn-clear-checked, .btn-clear-all { 
+        padding: 5px 10px !important; 
+        border-radius: 6px !important; 
+        border: none; font-weight: bold; cursor: pointer; font-family: 'Fredoka', sans-serif;
+    }
+    
     .btn-clear-checked { background: #e0e7ff; color: var(--primary-dark); }
     .btn-clear-all { background: #ffe4e6; color: #e11d48; }
 
@@ -311,31 +350,44 @@
     .btn-clear-all {
         font-family: 'Fredoka', sans-serif !important;
         font-weight: normal !important; 
-        font-size: 1rem !important; 
+        font-size: 0.8rem !important; 
     }
 
-    /* --- AJOUT MANUEL D'ARTICLES --- */
+    /* --- AJOUT MANUEL D'ARTICLES (HABITUDES) --- */
     .add-item-container {
         display: flex;
-        padding: 15px 20px 0 20px;
-        gap: 10px;
+        padding: 10px 10px 0 10px !important;
+        gap: 6px !important;
     }
+    
     .add-item-container input {
         flex: 1;
-        padding: 12px 15px;
+        padding: 8px 12px !important;
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        font-size: 1rem;
+        border-radius: 8px !important;
+        font-size: 0.88rem !important;
         outline: none;
         font-family: inherit;
     }
+    
+    #classic-category-select, #manual-category-select {
+        padding: 8px 4px !important;
+        border-radius: 8px !important;
+        font-size: 0.8rem !important;
+        max-width: 110px !important;
+        border: 1px solid var(--border-color);
+        background: white;
+        outline: none;
+        font-weight: 500;
+    }
+
     .add-item-container button {
         background: linear-gradient(135deg, var(--primary), var(--primary-dark));
         color: white;
         border: none;
-        border-radius: 12px;
-        width: 45px;
-        font-size: 1.5rem;
+        border-radius: 8px !important;
+        width: 35px !important;
+        font-size: 1.2rem !important;
         font-weight: bold;
         cursor: pointer;
         display: flex;
@@ -370,10 +422,6 @@
         </header>
 
         <div id="view-list" class="view active">
-            <div class="add-item-container">
-                <input type="text" id="manual-item-input" placeholder="Ajouter un article (ex: Lait, Pommes...)">
-                <button onclick="addManualItem()">+</button>
-            </div>
             <div class="view-content" id="list-container"></div> 
             <div class="footer-controls">
                 <span id="items-count">0 article(s)</span>
@@ -433,11 +481,27 @@
             <div class="view-content">
                 <h3 style="text-align: center; margin-bottom: 15px;">📦 Vos achats réguliers</h3>
                 
-                <div class="add-item-container" style="padding: 0; margin-bottom: 20px;">
-                    <input type="text" id="classic-item-input" placeholder="Ex: Lait, Beurre, Café...">
-                    <button onclick="addClassicItem()">+</button>
-                </div>
-
+	<div class="add-item-container" style="padding: 0; margin-bottom: 20px;">
+   	    <input type="text" id="classic-item-input" placeholder="Ex: Lait, Beurre, Café..." onkeyup="autoSuggestCategory()">
+    	    <select id="classic-category-select" style="padding: 12px 5px; border-radius: 12px; border: 1px solid var(--border-color); background: white; font-size: 0.9rem; outline: none; max-width: 140px; font-weight: 500;">
+    		<option value="Fruits & Légumes">🥦 Fruits & Lég.</option>
+    		<option value="Produits Laitiers">🥛 Laitier</option>
+   		<option value="Viandes & Poissons">🥩 Viandes/Poiss.</option>
+    		<option value="Boulangerie">🥖 Boulangerie</option>
+    		<option value="Surgelés">❄️ Surgelés</option>
+    		<option value="Boissons">🧃 Boissons</option>
+    		<option value="Hygiène & Entretien">🧼 Hygiène/Ent.</option>
+    		<option value="Bébé">👶 Bébé</option>
+    		<option value="Petit déjeuner">☕ Petit déj.</option>
+    		<option value="Féculents">🍝 Féculents</option>
+    		<option value="Épicerie salée">🥨 Épicerie salée</option>
+    		<option value="Épicerie sucrée">🍪 Épicerie sucrée</option>
+    		<option value="Plats cuisinés">🍱 Plats cuisinés</option>
+    		<option value="Maison & Jardin">🪴 Maison/Jardin</option>
+    		<option value="Sauces & Condiments">🥫 Sauces/Cond.</option>
+	    </select>
+    	    <button onclick="addClassicItem()">+</button>
+	</div>
                 <div id="classics-container" class="recipe-list"></div>
             </div>
         </div>
@@ -478,7 +542,24 @@
 
         const GEMINI_API_KEY = "AQ.Ab8RN6JVvIMCoWRSCAdbHosqozseWNN-G5f5dz0LYqdiOTGEjA"; 
 
-        const rayonIcons = { 'Fruits & Légumes': '🥦', 'Produits Laitiers': '🥛', 'Boulangerie': '🥖', 'Épicerie': '📦', 'Boucherie & Poissonnerie': '🥩', 'Entretien & Maison': '🧼', 'Divers / Autre': '🛒' };
+        const rayonIcons = { 
+    	    'Fruits & Légumes': '🥦', 
+    	    'Produits Laitiers': '🥛', 
+    	    'Viandes & Poissons': '🥩', 
+   	    'Boulangerie': '🥖', 
+   	    'Surgelés': '❄️', 
+   	    'Boissons': '🧃', 
+   	    'Hygiène & Entretien': '🧼', 
+   	    'Bébé': '👶', 
+    	    'Petit déjeuner': '☕', 
+    	    'Féculents': '🍝', 
+    	    'Épicerie salée': '🥨', 
+    	    'Épicerie sucrée': '🍪', 
+   	    'Plats cuisinés': '🍱', 
+    	    'Maison & Jardin': '🪴',
+    	    'Sauces & Condiments': '🥫',
+   	    'Divers / Autre': '🛒' 
+	};
         const badgeColors = [ { bg: '#e0e7ff', text: '#4f46e5' }, { bg: '#dcfce7', text: '#166534' }, { bg: '#ffedd5', text: '#9a3412' }, { bg: '#fce7f3', text: '#9d174d' }, { bg: '#e0f2fe', text: '#075985' }, { bg: '#fef08a', text: '#854d0e' }, { bg: '#f3e8ff', text: '#6b21a8' } ];
 
         let shoppingList = []; let fetchedRecipes = []; let favorites = []; let classicItems = []; let lastUserIntention = ""; 
@@ -717,32 +798,49 @@ Sauces & Condiments ;
 
         // --- GESTION DES HABITUDES (CLASSICS) ---
         // --- 3. L'AJOUT DANS LES HABITUDES (Avec IA) ---
-        async function addClassicItem() {
-            const input = document.getElementById('classic-item-input');
-            const btn = input.nextElementSibling;
-            const itemName = input.value.trim();
-            if (itemName === "") return;
+        // --- 3. L'AJOUT DANS LES HABITUDES (Sans IA, avec Sélecteur) ---
+function addClassicItem() {
+    const input = document.getElementById('classic-item-input');
+    const categorySelect = document.getElementById('classic-category-select');
+    const itemName = input.value.trim();
+    
+    if (itemName === "") return;
 
-            const oldText = btn.innerText;
-            btn.innerText = "⏳";
-            btn.disabled = true;
+    // On récupère directement la valeur du menu déroulant
+    const category = categorySelect.value;
 
-            const category = await askAICategory(itemName);
+    classicItems.push({
+        name: itemName,
+        category: category
+    });
 
-            // On sauvegarde l'article ET son rayon définitif !
-            classicItems.push({
-                name: itemName,
-                category: category
-            });
+    input.value = "";
+    // On réinitialise le selecteur sur une valeur par défaut
+    categorySelect.value = "Épicerie"; 
+    
+    saveToFirebase();
+    renderClassics();
+}
 
-            input.value = "";
-            btn.innerText = oldText;
-            btn.disabled = false;
+// --- EFFET FAMILYWALL : AUTO-APPRENTISSAGE ---
+function autoSuggestCategory() {
+    const input = document.getElementById('classic-item-input');
+    const select = document.getElementById('classic-category-select');
+    const typedName = input.value.trim().toLowerCase();
 
-            saveToFirebase();
-            renderClassics();
-        }
+    if (typedName === "") return;
 
+    // L'application cherche si tu as DÉJÀ enregistré cet article dans tes habitudes
+    // (Tu pourrais aussi faire chercher dans `shoppingList` si tu le souhaites)
+    const existingItem = classicItems.find(item => 
+        (typeof item === 'string' ? item.toLowerCase() : item.name.toLowerCase()) === typedName
+    );
+
+    // Si elle le trouve, elle change le selecteur toute seule
+    if (existingItem && typeof existingItem !== 'string') {
+        select.value = existingItem.category;
+    }
+}
         // --- 4. AFFICHAGE DES HABITUDES ---
         function renderClassics() {
             const container = document.getElementById('classics-container');
