@@ -317,7 +317,8 @@
     
     .btn-add-single { background: rgba(99, 102, 241, 0.1); color: var(--primary-dark); border: 1px solid rgba(99, 102, 241, 0.2); }
     .btn-add-single:hover { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2); }
-    .btn-add-single.added { background: #dcfce7; color: #15803d; border-color: #bbf7d0; box-shadow: none; pointer-events: none; }
+    .btn-add-single.added { background: #dcfce7; color: #15803d; border-color: #bbf7d0; box-shadow: none; cursor: pointer; }
+    .btn-add-single.added:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
     
     .btn-regenerate { background: #fef3c7; color: #b45309; flex: 0.5; }
     .btn-regenerate:hover { background: #fde68a; color: #92400e; }
@@ -470,6 +471,13 @@
             </div>
         </div>
 
+	<div id="view-menu" class="view">
+            <div class="view-content">
+                <h3 style="margin-bottom:15px; font-size:1.1rem; text-align: center;">🍽️ Au menu cette semaine</h3>
+                <div id="menu-container" class="recipe-list"></div> 
+            </div>
+        </div>
+
         <div id="view-favorites" class="view">
             <div class="view-content">
                 <h3 style="margin-bottom:15px; font-size:1.1rem; text-align: center;">❤️ Vos recettes préférées</h3>
@@ -508,6 +516,7 @@
 
         <div class="bottom-nav">
             <button id="tab-list" class="nav-btn active" onclick="switchTab('list')"><span>🛒</span> </button>
+            <button id="tab-menu" class="nav-btn" onclick="switchTab('menu')"><span>🍽️</span> </button>
             <button id="tab-recipes" class="nav-btn" onclick="switchTab('recipes')"><span>👨‍🍳</span> </button>
             <button id="tab-favorites" class="nav-btn" onclick="switchTab('favorites')"><span>❤️</span> </button>
             <button id="tab-classics" class="nav-btn" onclick="switchTab('classics')"><span>📦</span> </button>
@@ -562,7 +571,7 @@
 	};
         const badgeColors = [ { bg: '#e0e7ff', text: '#4f46e5' }, { bg: '#dcfce7', text: '#166534' }, { bg: '#ffedd5', text: '#9a3412' }, { bg: '#fce7f3', text: '#9d174d' }, { bg: '#e0f2fe', text: '#075985' }, { bg: '#fef08a', text: '#854d0e' }, { bg: '#f3e8ff', text: '#6b21a8' } ];
 
-        let shoppingList = []; let fetchedRecipes = []; let favorites = []; let classicItems = []; let lastUserIntention = ""; 
+        let shoppingList = []; let fetchedRecipes = []; let favorites = []; let classicItems = []; let plannedRecipes = []; let lastUserIntention = ""; 
         let currentPortions = 4; let currentRecipesCount = 3; let aiAbortController = null;
 
         // 2. Initialisation de Firebase
@@ -593,13 +602,14 @@
                         const data = doc.data();
                         shoppingList = data.shoppingList || [];
                         favorites = data.favorites || [];
-                        classicItems = data.classicItems || []; // Ajout des habitudes
+                        classicItems = data.classicItems || []; 
+                        plannedRecipes = data.plannedRecipes || []; // <-- On charge le menu
                     } else {
-                        shoppingList = []; favorites = []; classicItems = [];
+                        shoppingList = []; favorites = []; classicItems = []; plannedRecipes = [];
                     }
                     renderApp();
                     renderFavorites();
-                    renderClassics(); // Affichage des habitudes
+                    renderClassics(); 
                 });
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
@@ -631,35 +641,6 @@
             }
         }
 
-        async function addManualItem() {
-            const input = document.getElementById('manual-item-input');
-            const btn = input.nextElementSibling;
-            const itemName = input.value.trim();
-            if (itemName === "") return;
-
-            // On affiche un sablier pendant que l'IA réfléchit
-            const oldText = btn.innerText;
-            btn.innerText = "⏳";
-            btn.disabled = true;
-
-            const category = await askAICategory(itemName);
-
-            shoppingList.push({
-                id: Date.now() + Math.random().toString(),
-                name: itemName,
-                category: category,
-                checked: false,
-                sourceType: 'manual'
-            });
-
-            input.value = ""; 
-            btn.innerText = oldText;
-            btn.disabled = false;
-            
-            saveToFirebase(); 
-            renderApp(); 
-        }
-
 	// --- ANNULER LA REQUÊTE IA EN COURS ---
 	function cancelAIRequest() {
    	    if (aiAbortController) {
@@ -669,42 +650,14 @@
     	    resetRecipes(); // Réaffiche la page de recherche classique
 	}
 
-        function addManualItem() {
-            const input = document.getElementById('manual-item-input');
-            const itemName = input.value.trim();
-            if (itemName === "") return;
-
-            const category = guessCategory(itemName);
-
-            shoppingList.push({
-                id: Date.now() + Math.random().toString(),
-                name: itemName,
-                category: category,
-                checked: false,
-                sourceType: 'manual'
-            });
-
-            input.value = ""; 
-            saveToFirebase(); 
-            renderApp(); 
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const manualInput = document.getElementById('manual-item-input');
-            if (manualInput) {
-                manualInput.addEventListener('keypress', function (e) {
-                    if (e.key === 'Enter') addManualItem();
-                });
-            }
-        });
-
         // --- SAUVEGARDE GLOBALE ---
         function saveToFirebase() {
             if (userDocRef) {
                 userDocRef.set({
                     shoppingList: shoppingList,
                     favorites: favorites,
-                    classicItems: classicItems
+                    classicItems: classicItems,
+                    plannedRecipes: plannedRecipes // <-- On sauvegarde le menu
                 }, { merge: true });
             }
         }
@@ -723,6 +676,7 @@
             document.getElementById(`tab-${tabName}`).classList.add('active');
             if (tabName === 'favorites') renderFavorites();
             if (tabName === 'classics') renderClassics();
+	    if (tabName === 'menu') renderMenu();
         }
 
         function toggleFavorite(recipeId) {
@@ -759,11 +713,15 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="recipe-actions">
-                            <button class="btn-action btn-view" onclick="openRecipeDetails(${recipe.id})">📖 Lire</button>
-                            <button class="btn-action btn-add-single" id="btn-add-fav-${recipe.id}" onclick="addRecipeToCart(${recipe.id}, 'fav')">🛒 Ajouter</button>
-                        </div>
-                    </div>`;
+                    <div class="recipe-actions">
+                        <button class="btn-action btn-view" onclick="openRecipeDetails(${recipe.id})">📖 Lire</button>
+                        <button class="btn-action btn-add-single ${shoppingList.some(i => i.sourceNames && i.sourceNames.includes(recipe.nom)) ? 'added' : ''}" 
+                                id="btn-add-fav-${recipe.id}" 
+                                onclick="addRecipeToCart(${recipe.id}, 'fav')">
+                            ${shoppingList.some(i => i.sourceNames && i.sourceNames.includes(recipe.nom)) ? '❌ Retirer' : '🛒 Ajouter'}
+                        </button>
+                    </div>
+		</div>`;
             });
         }
 
@@ -954,47 +912,134 @@ function autoSuggestCategory() {
         function normalizeString(str) { return str ? str.toLowerCase().trim().replace(/s$/, '') : ""; }
 
         function addRecipeToCart(recipeId, source = 'main') {
-            const recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId);
+            const recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId) || plannedRecipes.find(r => r.id === recipeId);
             if (!recipe) return;
+            
             const btnId = source === 'fav' ? `btn-add-fav-${recipeId}` : `btn-add-${recipeId}`;
             const btn = document.getElementById(btnId);
 
-            recipe.ingredients.forEach(ing => {
-                const baseName = normalizeString(ing.nom);
+            // Vérifie si la recette est déjà dans la liste de courses
+            const isAlreadyAdded = shoppingList.some(item => item.sourceType === 'recipe' && item.sourceNames && item.sourceNames.includes(recipe.nom));
 
-                if (/\b(sel|poivre)\b/.test(baseName)) {
-                    return; 
+            if (isAlreadyAdded) {
+                // --- LOGIQUE DE RETRAIT ---
+                shoppingList = shoppingList.filter(item => {
+                    if (item.sourceType === 'recipe' && item.sourceNames && item.sourceNames.includes(recipe.nom)) {
+                        // S'il n'y a QUE cette recette comme source, on supprime carrément l'article
+                        if (item.sourceNames.length === 1) {
+                            return false; 
+                        } else {
+                            // Sinon (ingrédient partagé), on déduit la quantité et on retire le tag
+                            const ing = recipe.ingredients.find(i => normalizeString(i.nom) === normalizeString(item.rawName));
+                            if (ing && !isNaN(item.rawQte)) {
+                                const parsedQte = parseFloat(String(ing.qte).replace(',', '.'));
+                                if (!isNaN(parsedQte)) {
+                                    item.rawQte = Math.round((item.rawQte - parsedQte) * 100) / 100;
+                                    const texteUnite = (item.rawUnit === "pièce" || item.rawUnit === "pièces") ? "" : item.rawUnit;
+                                    item.name = `${item.rawQte} ${texteUnite} ${item.rawName}`.trim();
+                                }
+                            }
+                            item.sourceNames = item.sourceNames.filter(nom => nom !== recipe.nom);
+                            return true;
+                        }
+                    }
+                    return true;
+                });
+
+                if(btn) { 
+                    btn.innerHTML = "🛒 Ajouter"; 
+                    btn.classList.remove("added"); 
+                }
+            } else {
+                // --- LOGIQUE D'AJOUT ---
+
+                // On enregistre la recette dans le nouvel onglet "Au Menu"
+                if (!plannedRecipes.some(r => r.id === recipe.id)) {
+                    plannedRecipes.push(recipe); 
                 }
 
-                const parsedQte = parseFloat(String(ing.qte).replace(',', '.'));
-                const baseUnit = normalizeString(ing.unite);
+                recipe.ingredients.forEach(ing => {
+                    const baseName = normalizeString(ing.nom);
+                    if (/\b(sel|poivre)\b/.test(baseName)) return; 
 
-                let existingItem = null;
-                if (!isNaN(parsedQte)) {
-                    existingItem = shoppingList.find(item => item.sourceType === 'recipe' && normalizeString(item.rawName) === baseName && normalizeString(item.rawUnit) === baseUnit);
+                    const parsedQte = parseFloat(String(ing.qte).replace(',', '.'));
+                    const baseUnit = normalizeString(ing.unite);
+
+                    let existingItem = null;
+                    if (!isNaN(parsedQte)) {
+                        existingItem = shoppingList.find(item => item.sourceType === 'recipe' && normalizeString(item.rawName) === baseName && normalizeString(item.rawUnit) === baseUnit);
+                    }
+
+                    if (existingItem && !isNaN(existingItem.rawQte)) {
+                        existingItem.rawQte = Math.round((existingItem.rawQte + parsedQte) * 100) / 100;
+                        const texteUnite = (existingItem.rawUnit === "pièce" || existingItem.rawUnit === "pièces") ? "" : existingItem.rawUnit;
+                        existingItem.name = `${existingItem.rawQte} ${texteUnite} ${existingItem.rawName}`.trim();
+                        existingItem.checked = false; 
+                        if (!existingItem.sourceNames.includes(recipe.nom)) existingItem.sourceNames.push(recipe.nom);
+                    } else {
+                        const texteUnite = (ing.unite === "pièce" || ing.unite === "pièces") ? "" : ing.unite;
+                        shoppingList.push({
+                            id: Date.now() + Math.random().toString(), 
+                            name: `${ing.qte} ${texteUnite} ${ing.nom}`.trim(),
+                            category: ing.rayon, 
+                            checked: false, 
+                            sourceType: 'recipe', 
+                            sourceNames: [recipe.nom],
+                            rawName: ing.nom.trim(), 
+                            rawUnit: ing.unite.trim(), 
+                            rawQte: isNaN(parsedQte) ? ing.qte : parsedQte
+                        });
+                    }
+                });
+
+                if(btn) { 
+                    btn.innerHTML = "✅ Ajouté"; 
+                    btn.classList.add("added"); 
+                    // Petit effet visuel pour signifier qu'au prochain clic on annule
+                    setTimeout(() => { if(btn.classList.contains("added")) btn.innerHTML = "❌ Retirer"; }, 1500);
                 }
+            }
 
-                if (existingItem && !isNaN(existingItem.rawQte)) {
-                    existingItem.rawQte = Math.round((existingItem.rawQte + parsedQte) * 100) / 100;
-                    const texteUnite = (existingItem.rawUnit === "pièce" || existingItem.rawUnit === "pièces") ? "" : existingItem.rawUnit;
-                    existingItem.name = `${existingItem.rawQte} ${texteUnite} ${existingItem.rawName}`.trim();
-                    existingItem.checked = false; 
-                    if (!existingItem.sourceNames.includes(recipe.nom)) existingItem.sourceNames.push(recipe.nom);
-                } else {
-                    const texteUnite = (ing.unite === "pièce" || ing.unite === "pièces") ? "" : ing.unite;
-                    shoppingList.push({
-                        id: Date.now() + Math.random().toString(), name: `${ing.qte} ${texteUnite} ${ing.nom}`.trim(),
-                        category: ing.rayon, checked: false, sourceType: 'recipe', sourceNames: [recipe.nom],
-                        rawName: ing.nom.trim(), rawUnit: ing.unite.trim(), rawQte: isNaN(parsedQte) ? ing.qte : parsedQte
-                    });
-                }
-            });
-
-            if(btn) { btn.innerHTML = "✅ Ajouté"; btn.classList.add("added"); }
             renderApp();
             saveToFirebase();
         }
+	// --- ONGLET "AU MENU" ---
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = '';
+            
+            if (plannedRecipes.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;">Aucune recette au menu.<br><br>Ajoutez des recettes à votre liste de courses pour les retrouver ici quand vous cuisinez !</div>`;
+                return;
+            }
 
+            plannedRecipes.forEach(recipe => {
+                container.innerHTML += `
+                    <div class="recipe-card" id="menu-card-${recipe.id}">
+                        <div class="recipe-header">
+                            <div class="recipe-emoji-box">${recipe.emoji}</div>
+                            <div class="recipe-info">
+                                <h4>${recipe.nom}</h4>
+                                <div class="recipe-stats">
+                                    <span>🔪 ${recipe.temps_preparation} min • 🔥 ${recipe.temps_cuisson} min</span>
+                                    <span>👨‍🍳 ${recipe.portions} pers.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="recipe-actions">
+                            <button class="btn-action btn-view" onclick="openRecipeDetails(${recipe.id})">📖 Lire</button>
+                            <button class="btn-action" style="background: #fee2e2; color: #dc2626;" onclick="removeFromMenu(${recipe.id})">❌ Retirer du menu</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function removeFromMenu(recipeId) {
+            plannedRecipes = plannedRecipes.filter(r => r.id !== recipeId);
+            renderMenu();
+            saveToFirebase();
+        }
+	
         function resetRecipes() {
             fetchedRecipes = []; lastUserIntention = ""; document.getElementById('custom-prompt').value = ""; 
             document.getElementById('recipes-container').innerHTML = ''; document.getElementById('prompts-section').style.display = 'block';
@@ -1072,9 +1117,25 @@ Rayons STRICTEMENT : "Fruits & Légumes", "Produits Laitiers", "Boulangerie", "�
         async function regenerateRecipe(recipeId) {
             const recipeIndex = fetchedRecipes.findIndex(r => r.id === recipeId);
             if (recipeIndex === -1) return;
+            
+            const oldRecipe = fetchedRecipes[recipeIndex];
+
+            // --- NOUVEAUTÉ : Retrait automatique de la liste de courses ---
+            const isAlreadyAdded = shoppingList.some(item => 
+                item.sourceType === 'recipe' && 
+                item.sourceNames && 
+                item.sourceNames.includes(oldRecipe.nom)
+            );
+            
+            // Si la recette était ajoutée, on simule un clic sur "Retirer" pour nettoyer la liste
+            if (isAlreadyAdded) {
+                addRecipeToCart(recipeId); 
+            }
+            // --------------------------------------------------------------
+
             document.getElementById(`recipe-card-${recipeId}`).innerHTML = `<div class="loader" style="padding: 20px 0;"><div class="spinner"></div>Changement en cours...</div>`;
 
-            const systemPrompt = `Tu es un assistant culinaire français. Demande initiale : "${lastUserIntention}", pour ${currentPortions} personne(s). Il ne souhaite pas conserver la recette "${fetchedRecipes[recipeIndex].nom}". Génère UNE SEULE nouvelle recette différente. Adapte les quantités. Pas de décimales pour les pièces. Utilise gramme (g) ou Litre (L), jamais de ml. Tu peux utiliser des décimales pour les Litres (ex: 0.25 L).
+            const systemPrompt = `Tu es un assistant culinaire français. Demande initiale : "${lastUserIntention}", pour ${currentPortions} personne(s). Il ne souhaite pas conserver la recette "${oldRecipe.nom}". Génère UNE SEULE nouvelle recette différente. Adapte les quantités. Pas de décimales pour les pièces. Utilise gramme (g) ou Litre (L), jamais de ml. Tu peux utiliser des décimales pour les Litres (ex: 0.25 L).
 JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom", "emoji": "🥗", "temps_preparation": 15, "temps_cuisson": 20, "budget_par_personne": "3,50€", "portions": ${currentPortions}, "ingredients": [ {"nom": "Lait", "qte": "0.5", "unite": "L", "rayon": "Produits Laitiers"} ], "etapes": ["Laver les tomates."] } ] }`;
 
             try {
@@ -1086,9 +1147,11 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                 if(data.error) throw new Error(data.error.message);
                 fetchedRecipes[recipeIndex] = JSON.parse(data.candidates[0].content.parts[0].text).recipes[0];
                 displayGeneratedRecipes(fetchedRecipes);
-            } catch (error) { alert("Erreur : " + error.message); displayGeneratedRecipes(fetchedRecipes); }
+            } catch (error) { 
+                alert("Erreur : " + error.message); 
+                displayGeneratedRecipes(fetchedRecipes); 
+            }
         }
-
         function displayGeneratedRecipes(recipesArray) {
             fetchedRecipes = recipesArray; 
             const container = document.getElementById('recipes-container');
@@ -1111,18 +1174,22 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                                     </div>
                                 </div>
                             </div>
-                            <div class="recipe-actions">
-                                <button class="btn-action btn-view" onclick="openRecipeDetails(${recipe.id})">📖 Lire</button>
-                                <button class="btn-action btn-regenerate" onclick="regenerateRecipe(${recipe.id})">🔄 Changer</button>
-                                <button class="btn-action btn-add-single" id="btn-add-${recipe.id}" onclick="addRecipeToCart(${recipe.id})">🛒 Ajouter</button>
-                            </div>
-                        </div>`;
+                        <div class="recipe-actions">
+                            <button class="btn-action btn-view" onclick="openRecipeDetails(${recipe.id})">📖 Lire</button>
+                            <button class="btn-action btn-regenerate" onclick="regenerateRecipe(${recipe.id})">🔄 Changer</button>
+                            <button class="btn-action btn-add-single ${shoppingList.some(i => i.sourceNames && i.sourceNames.includes(recipe.nom)) ? 'added' : ''}" 
+                                    id="btn-add-${recipe.id}" 
+                                    onclick="addRecipeToCart(${recipe.id})">
+                                ${shoppingList.some(i => i.sourceNames && i.sourceNames.includes(recipe.nom)) ? '❌ Retirer' : '🛒 Ajouter'}
+                            </button>
+                        </div>
+		    </div>`;
                 });
             }
         }
         
         function openRecipeDetails(recipeId) {
-            const recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId);
+            const recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId) || plannedRecipes.find(r => r.id === recipeId);
             if (!recipe) return;
             document.getElementById('details-title').innerText = `${recipe.emoji} ${recipe.nom}`;
             document.getElementById('details-stats').innerHTML = `<span>🔪 ${recipe.temps_preparation} min</span><span>🔥 ${recipe.temps_cuisson} min</span><span>👨‍🍳 ${recipe.portions} pers.</span>`;
