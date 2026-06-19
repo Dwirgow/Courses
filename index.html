@@ -563,7 +563,7 @@
         const badgeColors = [ { bg: '#e0e7ff', text: '#4f46e5' }, { bg: '#dcfce7', text: '#166534' }, { bg: '#ffedd5', text: '#9a3412' }, { bg: '#fce7f3', text: '#9d174d' }, { bg: '#e0f2fe', text: '#075985' }, { bg: '#fef08a', text: '#854d0e' }, { bg: '#f3e8ff', text: '#6b21a8' } ];
 
         let shoppingList = []; let fetchedRecipes = []; let favorites = []; let classicItems = []; let lastUserIntention = ""; 
-        let currentPortions = 4; let currentRecipesCount = 3; 
+        let currentPortions = 4; let currentRecipesCount = 3; let aiAbortController = null;
 
         // 2. Initialisation de Firebase
         const firebaseConfig = {
@@ -631,44 +631,6 @@
             }
         }
 
-        // --- INTELLIGENCE DE CLASSEMENT ---
-        // --- 1. L'IA QUI DEVINERA LE RAYON TOUTE SEULE ---
-        async function askAICategory(itemName) {
-            const systemPrompt = `Tu es un assistant de liste de courses. Catégorise cet article : "${itemName}".
-Réponds UNIQUEMENT par l'une de ces catégories exactes, sans aucune autre phrase :
-Fruits & Légumes
-Produits Laitiers
-Viandes & Poissons
-Boulangerie
-Surgelés
-Boissons
-Hygiène & Entretien
-Bébé
-Petit déjeuner
-Féculents
-Épicerie salée
-Épicerie sucrée
-Plats cuisinés
-Maison & Jardin`
-Sauces & Condiments ;
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
-                    method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }] })
-                });
-                const data = await response.json();
-                let category = data.candidates[0].content.parts[0].text.trim();
-                
-                // Sécurité : si l'IA invente un nom de rayon, on le met dans "Autres"
-                const valid = ["Fruits & Légumes", "Produits Laitiers", "Viandes & Poissons", "Boulangerie", "Surgelés", "Boissons", "Hygiène & Entretien", "Bébé", "Petit déjeuner", "Féculents", "Épicerie / Autres"];
-                return valid.includes(category) ? category : "Épicerie / Autres";
-            } catch (error) {
-                return "Épicerie / Autres";
-            }
-        }
-
-        // --- 2. L'AJOUT DANS LA LISTE DE COURSES (Avec IA) ---
         async function addManualItem() {
             const input = document.getElementById('manual-item-input');
             const btn = input.nextElementSibling;
@@ -697,6 +659,15 @@ Sauces & Condiments ;
             saveToFirebase(); 
             renderApp(); 
         }
+
+	// --- ANNULER LA REQUÊTE IA EN COURS ---
+	function cancelAIRequest() {
+   	    if (aiAbortController) {
+        	aiAbortController.abort(); // Coupe la connexion
+        	aiAbortController = null;
+    	    }
+    	    resetRecipes(); // Réaffiche la page de recherche classique
+	}
 
         function addManualItem() {
             const input = document.getElementById('manual-item-input');
@@ -797,7 +768,6 @@ Sauces & Condiments ;
         }
 
         // --- GESTION DES HABITUDES (CLASSICS) ---
-        // --- 3. L'AJOUT DANS LES HABITUDES (Avec IA) ---
         // --- 3. L'AJOUT DANS LES HABITUDES (Sans IA, avec Sélecteur) ---
 function addClassicItem() {
     const input = document.getElementById('classic-item-input');
@@ -1035,42 +1005,70 @@ function autoSuggestCategory() {
         function handleCustomPrompt() { const input = document.getElementById('custom-prompt').value.trim(); if (input !== "") askAI(input); }
 
         async function askAI(userIntention) {
-            currentPortions = document.getElementById('portions').value || 4; 
-            currentRecipesCount = document.getElementById('recipes-count').value || 3;
-            
-            lastUserIntention = userIntention; 
-            document.getElementById('prompts-section').style.display = 'none';
-            document.getElementById('recipes-container').innerHTML = `<div class="loader"><div class="spinner"></div>L'IA élabore vos ${currentRecipesCount} repas...</div>`;
+    // Si une requête est déjà en cours, on l'annule par sécurité
+    if (aiAbortController) aiAbortController.abort();
+    
+    // On crée un nouveau contrôleur pour cette requête
+    aiAbortController = new AbortController();
+    const signal = aiAbortController.signal;
 
-            const systemPrompt = `Tu es un assistant culinaire français.
+    currentPortions = document.getElementById('portions').value || 4; 
+    currentRecipesCount = document.getElementById('recipes-count').value || 3;
+    
+    lastUserIntention = userIntention; 
+    document.getElementById('prompts-section').style.display = 'none';
+    
+    // On ajoute le bouton Annuler dans le loader
+    document.getElementById('recipes-container').innerHTML = `
+        <div class="loader">
+            <div class="spinner"></div>
+            <div>L'IA élabore vos ${currentRecipesCount} repas...</div>
+            <button onclick="cancelAIRequest()" style="margin-top: 15px; padding: 8px 16px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; color: var(--text-muted); font-weight: bold; cursor: pointer; font-size: 0.9rem;">Annuler</button>
+        </div>`;
+
+    const systemPrompt = `Tu es un assistant culinaire français.
 L'utilisateur souhaite EXACTEMENT ${currentRecipesCount} recette(s) pour ${currentPortions} personne(s). Adapte bien les quantités.
 1. Pas de décimales pour les pièces.
 2. Utilise "gramme" (g) ou "Litre" (L). N'utilise JAMAIS de millilitres (ml) ou centilitres (cl). Tu peux utiliser des décimales pour les Litres (ex: 0.2 L).
 Sinon, tu dois OBLIGATOIREMENT répondre avec un objet JSON strict correspondant à ce format exact :
 { "recipes": [ { "id": 1, "nom": "Nom", "emoji": "🥗", "temps_preparation": 15, "temps_cuisson": 20, "budget_par_personne": "3,50€", "portions": ${currentPortions}, "ingredients": [ {"nom": "Tomate", "qte": "2", "unite": "pièces", "rayon": "Fruits & Légumes"} ], "etapes": [ "Laver." ] } ] }
 Assure-toi que le tableau "recipes" contienne exactement ${currentRecipesCount} éléments.
-Rayons STRICTEMENT : "Fruits & Légumes", "Produits Laitiers", "Boulangerie", "Épicerie", "Boucherie & Poissonnerie", "Entretien & Maison", "Divers / Autre".`;
+Rayons STRICTEMENT : "Fruits & Légumes", "Produits Laitiers", "Boulangerie", "Épicerie", "Viandes & Poissons", "Hygiène & Entretien", "Surgelés", "Boissons", "Bébé", "Petit déjeuner", "Féculents", "Épicerie salée", "Épicerie sucrée", "Plats cuisinés", "Maison & Jardin", "Sauces & Condiments", "Divers / Autre".`;
 
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
-                    method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt + "\n\nRequête : " + userIntention }] }], generationConfig: { responseMimeType: "application/json" } })
-                });
-                const data = await response.json();
-                if(data.error) throw new Error(data.error.message);
-                const parsedData = JSON.parse(data.candidates[0].content.parts[0].text);
-                if (parsedData.error) {
-                    document.getElementById('btn-reset').style.display = 'block';
-                    document.getElementById('recipes-container').innerHTML = `<div style="color: var(--text-main); text-align: center; padding: 25px; background: #fee2e2; border-radius: 16px; margin-top: 10px; border: 1px solid #fca5a5;"><span style="font-size: 2.5rem; margin-bottom: 10px; display: block;">🛑</span><b>Hors-sujet détecté</b><br><br><i>${parsedData.error}</i></div>`;
-                    return;
-                }
-                parsedData.recipes.forEach(r => r.id = Date.now() + Math.floor(Math.random() * 1000));
-                displayGeneratedRecipes(parsedData.recipes);
-            } catch (error) {
-                document.getElementById('recipes-container').innerHTML = `<div style="color: var(--danger); text-align: center; padding: 20px;"><b>Erreur de l'IA.</b><br><br><i>${error.message}</i><br><br><button onclick="resetRecipes()" style="padding:10px; border-radius: 8px; border: none; background: var(--primary); color: white; cursor: pointer;">Réessayer</button></div>`;
-            }
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
+            method: "POST", 
+            headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
+            body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt + "\n\nRequête : " + userIntention }] }], generationConfig: { responseMimeType: "application/json" } }),
+            signal: signal // <-- On attache le signal d'annulation ici
+        });
+        
+        const data = await response.json();
+        if(data.error) throw new Error(data.error.message);
+        
+        const parsedData = JSON.parse(data.candidates[0].content.parts[0].text);
+        if (parsedData.error) {
+            document.getElementById('btn-reset').style.display = 'block';
+            document.getElementById('recipes-container').innerHTML = `<div style="color: var(--text-main); text-align: center; padding: 25px; background: #fee2e2; border-radius: 16px; margin-top: 10px; border: 1px solid #fca5a5;"><span style="font-size: 2.5rem; margin-bottom: 10px; display: block;">🛑</span><b>Hors-sujet détecté</b><br><br><i>${parsedData.error}</i></div>`;
+            return;
         }
-
+        
+        parsedData.recipes.forEach(r => r.id = Date.now() + Math.floor(Math.random() * 1000));
+        displayGeneratedRecipes(parsedData.recipes);
+        
+        aiAbortController = null; // Nettoyage si tout s'est bien passé
+        
+    } catch (error) {
+        // On vérifie si l'erreur vient d'une annulation manuelle
+        if (error.name === 'AbortError') {
+            console.log('Génération IA annulée.');
+            // Pas besoin d'afficher d'erreur, l'interface est déjà réinitialisée par cancelAIRequest()
+        } else {
+            document.getElementById('recipes-container').innerHTML = `<div style="color: var(--danger); text-align: center; padding: 20px;"><b>Erreur de l'IA.</b><br><br><i>${error.message}</i><br><br><button onclick="resetRecipes()" style="padding:10px; border-radius: 8px; border: none; background: var(--primary); color: white; cursor: pointer;">Réessayer</button></div>`;
+        }
+        aiAbortController = null;
+    }
+}
         async function regenerateRecipe(recipeId) {
             const recipeIndex = fetchedRecipes.findIndex(r => r.id === recipeId);
             if (recipeIndex === -1) return;
