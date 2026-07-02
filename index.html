@@ -785,55 +785,61 @@ function autoSuggestCategory() {
 }
         // --- 4. AFFICHAGE DES HABITUDES ---
         function renderClassics() {
-            const container = document.getElementById('classics-container');
-            if (!container) return; 
-            container.innerHTML = '';
+			const container = document.getElementById('classics-container');
+			if (!container) return; 
+			container.innerHTML = '';
+    
+			if (classicItems.length === 0) {
+				container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;">Aucun achat régulier enregistré.<br><br>Ajoutez vos basiques ici pour les retrouver facilement !</div>`;
+				return;
+			}
+
+			const grouped = {};
+			classicItems.forEach((itemObj, index) => {
+				const name = typeof itemObj === 'string' ? itemObj : itemObj.name;
+				const category = typeof itemObj === 'string' ? "Épicerie / Autres" : itemObj.category;
+
+				if (!grouped[category]) grouped[category] = [];
+				grouped[category].push({ name: name, originalIndex: index }); 
+			});
+
+			for (let rayon in grouped) {
+				const section = document.createElement('div');
+				section.className = 'rayon-section';
+				section.innerHTML = `<div class="rayon-title">${rayonIcons[rayon] || '🛒'} ${rayon}</div>`;
+        
+				const list = document.createElement('ul'); 
+				list.className = 'item-list';
+
+				grouped[rayon].forEach(itemObj => {
+					// Vérifie si l'article est actuellement dans la liste de courses
+					const isAdded = shoppingList.some(cartItem => cartItem.name === itemObj.name);
             
-            if (classicItems.length === 0) {
-                container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;">Aucun achat régulier enregistré.<br><br>Ajoutez vos basiques ici pour les retrouver facilement !</div>`;
-                return;
-            }
+					// Applique le style en fonction de la présence dans la liste
+					const btnText = isAdded ? "✓ Ajouté" : "+ Ajouter";
+					const btnBg = isAdded ? "#dcfce7" : "#e0e7ff";
+					const btnColor = isAdded ? "#166534" : "var(--primary-dark)";
 
-            const grouped = {};
-            classicItems.forEach((itemObj, index) => {
-                // Rétrocompatibilité si d'anciens éléments sont encore de simples textes
-                const name = typeof itemObj === 'string' ? itemObj : itemObj.name;
-                const category = typeof itemObj === 'string' ? "Épicerie / Autres" : itemObj.category;
-
-                if (!grouped[category]) grouped[category] = [];
-                grouped[category].push({ name: name, originalIndex: index }); 
-            });
-
-            for (let rayon in grouped) {
-                const section = document.createElement('div');
-                section.className = 'rayon-section';
-                section.innerHTML = `<div class="rayon-title">${rayonIcons[rayon] || '🛒'} ${rayon}</div>`;
-                
-                const list = document.createElement('ul'); 
-                list.className = 'item-list';
-
-                grouped[rayon].forEach(itemObj => {
-                    const li = document.createElement('li');
-                    li.className = 'shopping-item'; 
-                    li.style.cursor = 'default'; 
-                    
-                    li.innerHTML = `
-                        <div class="item-left">
-                            <span class="item-name">${itemObj.name}</span>
-                        </div>
-                        <div style="display: flex; gap: 12px; align-items: center;">
-                            <button onclick="addClassicToShoppingList(${itemObj.originalIndex}, this)" style="background: #e0e7ff; color: var(--primary-dark); border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; transition: background 0.2s;">+ Ajouter</button>
-                            <button class="btn-delete" onclick="removeClassicItem(${itemObj.originalIndex})">×</button>
-                        </div>
-                    `;
-                    list.appendChild(li);
-                });
-                
-                section.appendChild(list); 
-                container.appendChild(section);
-            }
-        }
-
+					const li = document.createElement('li');
+					li.className = 'shopping-item'; 
+					li.style.cursor = 'default'; 
+            
+					li.innerHTML = `
+						<div class="item-left">
+							<span class="item-name">${itemObj.name}</span>
+						</div>
+						<div style="display: flex; gap: 12px; align-items: center;">
+							<button onclick="addClassicToShoppingList(${itemObj.originalIndex})" style="background: ${btnBg}; color: ${btnColor}; border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">${btnText}</button>
+							<button class="btn-delete" onclick="removeClassicItem(${itemObj.originalIndex})">×</button>
+						</div>
+					`;
+					list.appendChild(li);
+				});
+        
+				section.appendChild(list); 
+				container.appendChild(section);
+			}
+		}
         function removeClassicItem(index) {
             classicItems.splice(index, 1);
             saveToFirebase();
@@ -841,36 +847,32 @@ function autoSuggestCategory() {
         }
 
         // --- 5. ENVOI DE L'HABITUDE VERS LA LISTE DE COURSES ---
-        function addClassicToShoppingList(index, btnElement) {
-            const item = classicItems[index];
-            const itemName = typeof item === 'string' ? item : item.name;
-            const category = typeof item === 'string' ? "Épicerie / Autres" : item.category;
-            
-            shoppingList.push({
-                id: Date.now() + Math.random().toString(),
-                name: itemName,
-                category: category, // Le rayon est déjà connu, c'est instantané !
-                checked: false,
-                sourceType: 'manual'
-            });
-            
-            saveToFirebase();
-            renderApp(); 
-            
-            const originalText = btnElement.innerText;
-            const originalBg = btnElement.style.background;
-            const originalColor = btnElement.style.color;
-            
-            btnElement.innerText = "✓ Ajouté";
-            btnElement.style.background = "#dcfce7";
-            btnElement.style.color = "#166534";
-            
-            setTimeout(() => {
-                btnElement.innerText = originalText;
-                btnElement.style.background = originalBg;
-                btnElement.style.color = originalColor;
-            }, 1000);
-        }
+        function addClassicToShoppingList(index) {
+			const item = classicItems[index];
+			const itemName = typeof item === 'string' ? item : item.name;
+			const category = typeof item === 'string' ? "Épicerie / Autres" : item.category;
+    
+			// On cherche si l'article est déjà présent
+			const existingItemIndex = shoppingList.findIndex(cartItem => cartItem.name === itemName);
+    
+			if (existingItemIndex > -1) {
+				// S'il est déjà dans la liste, on le retire (fonctionnalité on/off très pratique)
+				shoppingList.splice(existingItemIndex, 1);
+			} else {
+				// Sinon, on l'ajoute
+				shoppingList.push({
+					id: Date.now() + Math.random().toString(),
+					name: itemName,
+					category: category,
+					checked: false,
+					sourceType: 'manual'
+				});
+			}
+    
+			saveToFirebase();
+			renderApp(); 
+			renderClassics(); // Recharge l'onglet habitudes pour figer le bouton en vert
+		}
         
         // --- AFFICHAGE DE L'APPLICATION (COURSES) ---
         function renderApp() {
