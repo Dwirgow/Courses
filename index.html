@@ -390,6 +390,7 @@
         border: none;
         border-radius: 8px !important;
         width: 35px !important;
+		flex-shrink: 0;
         font-size: 1.2rem !important;
         font-weight: bold;
         cursor: pointer;
@@ -493,7 +494,7 @@
                 
 	<div class="add-item-container" style="padding: 0; margin-bottom: 20px;">
    	    <input type="text" id="classic-item-input" placeholder="Ex: Lait, Beurre, Café..." onkeyup="autoSuggestCategory()">
-    	    <select id="classic-category-select" style="padding: 12px 5px; border-radius: 12px; border: 1px solid var(--border-color); background: white; font-size: 0.9rem; outline: none; max-width: 140px; font-weight: 500;">
+		<select id="classic-category-select" style="padding: 10px 4px; border-radius: 12px; border: 1px solid var(--border-color); background: white; font-size: 0.85rem; outline: none; max-width: 105px; font-weight: 500; flex-shrink: 0;">
     		<option value="Fruits & Légumes">🥦 Fruits & Lég.</option>
     		<option value="Produits Laitiers">🥛 Laitier</option>
    		<option value="Viandes & Poissons">🥩 Viandes/Poiss.</option>
