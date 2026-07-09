@@ -535,6 +535,7 @@
                     <div class="details-stats-bar" id="details-stats"></div>
                 </div>
                 <div class="steps-container">
+					<div id="details-ingredients"></div>
                     <h4 style="color:var(--primary);">👨‍🍳 Étapes de préparation</h4>
                     <div id="details-steps"></div>
                 </div>
@@ -993,7 +994,7 @@ function autoSuggestCategory() {
 
                 recipe.ingredients.forEach(ing => {
                     const baseName = normalizeString(ing.nom);
-                    if (/\b(sel|poivre)\b/.test(baseName)) return; 
+                    if (/\b(sel|poivre|huile)\b/.test(baseName)) return; 
 
                     const parsedQte = parseFloat(String(ing.qte).replace(',', '.'));
                     const baseUnit = normalizeString(ing.unite);
@@ -1224,10 +1225,32 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
         function openRecipeDetails(recipeId) {
             const recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId) || plannedRecipes.find(r => r.id === recipeId);
             if (!recipe) return;
+            
             document.getElementById('details-title').innerText = `${recipe.emoji} ${recipe.nom}`;
             document.getElementById('details-stats').innerHTML = `<span>🔪 ${recipe.temps_preparation} min</span><span>🔥 ${recipe.temps_cuisson} min</span><span>👨‍🍳 ${recipe.portions} pers.</span>`;
+            
+            let ingredientsHtml = '<h4 style="color:var(--primary); font-size: 1.1rem; margin-bottom: 15px; display: inline-block; border-bottom: 2px solid rgba(99, 102, 241, 0.2); padding-bottom: 4px;">🛒 Ingrédients</h4><ul style="padding-left: 20px; line-height: 1.7; color: #334155; margin-bottom: 25px; font-size: 0.95rem;">';
+            
+            recipe.ingredients.forEach(ing => {
+                // --- NOUVEAU : On filtre le sel, poivre et huile ---
+                // On met le nom en minuscules pour s'assurer de bien détecter les mots
+                if (/\b(sel|poivre|huile)\b/i.test(ing.nom)) {
+                    return; // Si ça correspond, on passe directement au suivant sans l'afficher
+                }
+
+                // On n'affiche pas le mot "pièce(s)" pour rendre la lecture plus fluide
+                const texteUnite = (ing.unite === "pièce" || ing.unite === "pièces") ? "" : ing.unite;
+                ingredientsHtml += `<li style="margin-bottom: 8px;"><strong>${ing.qte} ${texteUnite}</strong> ${ing.nom}</li>`;
+            });
+            ingredientsHtml += '</ul>';
+            
+            // On injecte les ingrédients dans le HTML
+            document.getElementById('details-ingredients').innerHTML = ingredientsHtml;
+
+            // --- Étapes de préparation ---
             let stepsHtml = '<ol>' + recipe.etapes.map(e => `<li>${e}</li>`).join('') + '</ol>';
             document.getElementById('details-steps').innerHTML = stepsHtml;
+            
             document.getElementById('recipe-details-modal').style.display = 'flex';
         }
 
