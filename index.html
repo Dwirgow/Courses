@@ -696,15 +696,25 @@
         }
 
         function toggleFavorite(recipeId) {
-            let recipe = fetchedRecipes.find(r => r.id === recipeId) || favorites.find(r => r.id === recipeId);
-            if (!recipe) return;
-            const index = favorites.findIndex(f => f.id === recipeId);
-            if (index > -1) favorites.splice(index, 1);
-            else favorites.push(recipe);
-            displayGeneratedRecipes(fetchedRecipes);
-            renderFavorites();
-            saveToFirebase();
-        }
+			// 1. On cherche la recette partout (y compris dans plannedRecipes)
+			let recipe = fetchedRecipes.find(r => r.id === recipeId) || 
+					favorites.find(r => r.id === recipeId) || 
+					plannedRecipes.find(r => r.id === recipeId);
+                 
+			if (!recipe) return;
+
+			// 2. On ajoute ou retire des favoris
+			const index = favorites.findIndex(f => f.id === recipeId);
+			if (index > -1) favorites.splice(index, 1);
+			else favorites.push(recipe);
+    
+			// 3. On rafraîchit l'affichage de TOUS les onglets concernés
+			displayGeneratedRecipes(fetchedRecipes);
+			renderFavorites();
+			renderMenu(); // Ajout du rafraîchissement du menu pour que le cœur change de couleur
+    
+			saveToFirebase();
+		}
 
         function renderFavorites() {
             const container = document.getElementById('favorites-container');
@@ -1039,34 +1049,40 @@ function autoSuggestCategory() {
         }
 	// --- ONGLET "AU MENU" ---
         function renderMenu() {
-            const container = document.getElementById('menu-container');
-            container.innerHTML = '';
-            
-            if (plannedRecipes.length === 0) {
-                container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;">Aucune recette au menu.<br><br>Ajoutez des recettes à votre liste de courses pour les retrouver ici quand vous cuisinez !</div>`;
-                return;
-            }
+			const container = document.getElementById('menu-container');
+			container.innerHTML = '';
+    
+			if (plannedRecipes.length === 0) {
+				container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px 20px;">Aucune recette au menu.<br><br>Ajoutez des recettes à votre liste de courses pour les retrouver ici quand vous cuisinez !</div>`;
+				return;
+			}
 
-            plannedRecipes.forEach(recipe => {
-                container.innerHTML += `
-                    <div class="recipe-card" id="menu-card-${recipe.id}">
-                        <div class="recipe-header">
-                            <div class="recipe-emoji-box">${recipe.emoji}</div>
-                            <div class="recipe-info">
-                                <h4>${recipe.nom}</h4>
-                                <div class="recipe-stats">
-                                    <span>🔪 ${recipe.temps_preparation} min • 🔥 ${recipe.temps_cuisson} min</span>
-                                    <span>👨‍🍳 ${recipe.portions} pers.</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="recipe-actions">
-                            <button class="btn-action btn-view" onclick="openRecipeDetails(${recipe.id})">📖 Lire</button>
-                            <button class="btn-action" style="background: #fee2e2; color: #dc2626;" onclick="removeFromMenu(${recipe.id})">❌ Retirer du menu</button>
-                        </div>
-                    </div>`;
-            });
-        }
+			plannedRecipes.forEach(recipe => {
+				// ON VÉRIFIE SI LA RECETTE EST DANS LES FAVORIS
+				const isFav = favorites.some(f => f.id === recipe.id);
+        
+				container.innerHTML += `
+					<div class="recipe-card" id="menu-card-${recipe.id}">
+						<!-- AJOUT DU BOUTON CŒUR FLOTTANT -->
+						<button class="btn-heart" onclick="toggleFavorite(${recipe.id})">${isFav ? '❤️' : '🤍'}</button>
+                
+						<div class="recipe-header">
+							<div class="recipe-emoji-box">${recipe.emoji}</div>
+							<div class="recipe-info">
+								<h4>${recipe.nom}</h4>
+								<div class="recipe-stats">
+									<span>🔪 ${recipe.temps_preparation} min • 🔥 ${recipe.temps_cuisson} min</span>
+									<span>👨‍🍳 ${recipe.portions} pers.</span>
+								</div>
+							</div>
+						</div>
+						<div class="recipe-actions">
+							<button class="btn-action btn-view" onclick="openRecipeDetails(${recipe.id})">📖 Lire</button>
+							<button class="btn-action" style="background: #fee2e2; color: #dc2626;" onclick="removeFromMenu(${recipe.id})">❌ Retirer du menu</button>
+						</div>
+					</div>`;
+			});
+		}
 
         function removeFromMenu(recipeId) {
             plannedRecipes = plannedRecipes.filter(r => r.id !== recipeId);
