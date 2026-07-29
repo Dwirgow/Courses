@@ -579,12 +579,21 @@
 
                 <label style="font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block;">Ingrédients :</label>
                 
-                <!-- NOUVEAU CONTENEUR POUR LES INGRÉDIENTS -->
-                <div id="manual-ingredients-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                <!-- EN-TÊTE DÉROULANT POUR LES INGRÉDIENTS -->
+                <div onclick="toggleIngredients()" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #f8fafc; border-radius: 12px; cursor: pointer; margin-bottom: 10px; border: 1px solid var(--border-color);">
+                    <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">🛒 Ingrédients</span>
+                    <span id="ingredients-arrow" style="font-size: 0.9rem; transition: transform 0.3s ease;">▼</span>
+                </div>
+
+                <!-- CONTENEUR DÉROULANT (Fermé par défaut) -->
+                <div id="ingredients-section" style="display: none; flex-direction: column; margin-bottom: 20px; padding: 5px 0;">
+                    <div id="manual-ingredients-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;">
+                        <!-- Les lignes s'ajouteront ici automatiquement -->
                     </div>
-                
-                <!-- BOUTON POUR AJOUTER UNE LIGNE -->
-                <button onclick="addManualIngredientRow()" style="width: 100%; padding: 10px; margin-bottom: 25px; background: #f8fafc; color: var(--primary); border: 2px dashed #cbd5e1; border-radius: 12px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">➕ Ajouter un ingrédient</button>
+                    
+                    <button onclick="addManualIngredientRow()" style="width: 100%; padding: 10px; background: white; color: var(--primary); border: 2px dashed #cbd5e1; border-radius: 12px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">➕ Ajouter un ingrédient</button>
+                </div>
+
                 <label style="font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block;">Préparation (Optionnel) :</label>
                 <textarea id="manual-etapes" rows="4" placeholder="1. Éplucher les pommes...&#10;2. Étaler la pâte..." style="width: 100%; padding: 12px; margin-bottom: 25px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; outline: none; resize: none; font-family: inherit;"></textarea>
                 
@@ -1344,6 +1353,9 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
         function openManualRecipeModal(recipeId = null) {
             const modalTitle = document.getElementById('manual-modal-title');
             const ingredientsContainer = document.getElementById('manual-ingredients-list');
+			
+			document.getElementById('ingredients-section').style.display = 'none';
+            document.getElementById('ingredients-arrow').style.transform = 'rotate(0deg)';
             
             // On vide toujours la liste des ingrédients avant de l'ouvrir
             ingredientsContainer.innerHTML = '';
@@ -1410,7 +1422,7 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
             container.appendChild(row);
         }
 
-function saveManualRecipe() {
+		function saveManualRecipe() {
             const recipeId = document.getElementById('manual-recipe-id').value;
             const nom = document.getElementById('manual-nom').value.trim();
             const emoji = document.getElementById('manual-emoji').value.trim() || '🍽️';
@@ -1475,6 +1487,20 @@ function saveManualRecipe() {
             saveToFirebase();
             renderFavorites();
             closeManualRecipeModal();
+        }
+		
+		// --- GESTION DU MENU DÉROULANT DES INGRÉDIENTS ---
+        function toggleIngredients() {
+            const section = document.getElementById('ingredients-section');
+            const arrow = document.getElementById('ingredients-arrow');
+            
+            if (section.style.display === 'none') {
+                section.style.display = 'flex';
+                arrow.style.transform = 'rotate(180deg)'; // Fait tourner la flèche vers le haut
+            } else {
+                section.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)'; // Remet la flèche vers le bas
+            }
         }
     </script>
 </body>
