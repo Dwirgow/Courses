@@ -1318,7 +1318,7 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
 
                 // On n'affiche pas le mot "pièce(s)" pour rendre la lecture plus fluide
                 const texteUnite = (ing.unite === "pièce" || ing.unite === "pièces") ? "" : ing.unite;
-                ingredientsHtml += `<li style="margin-bottom: 8px;"><strong>${ing.qte} ${texteUnite}</strong> ${ing.nom}</li>`;
+                ingredientsHtml += `<li style="margin-bottom: 8px;"><strong>${ing.qte}</strong> ${texteUnite} ${ing.nom}</li>`;
             });
             ingredientsHtml += '</ul>';
             
