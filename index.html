@@ -1361,7 +1361,7 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                     
                     // Remplir les lignes d'ingrédients existantes
                     recipe.ingredients.forEach(ing => {
-                        let qte = ing.qte === 1 && ing.unite === "pièce" ? "" : ing.qte; // Masque le "1" si c'est une pièce sans quantité précisée
+                        let qte = ing.qte; // On ne masque plus le 1 !
                         let unite = (ing.unite === "pièce" || ing.unite === "pièces") ? "" : ing.unite;
                         addManualIngredientRow(qte, unite, ing.nom);
                     });
