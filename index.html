@@ -1121,8 +1121,9 @@ function autoSuggestCategory() {
             <button onclick="cancelAIRequest()" style="margin-top: 15px; padding: 8px 16px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; color: var(--text-muted); font-weight: bold; cursor: pointer; font-size: 0.9rem;">Annuler</button>
         </div>`;
 
-    const systemPrompt = `Tu es un assistant culinaire français.
+    const systemPrompt = `Tu es un assistant culinaire expert en cuisine du monde.
 L'utilisateur souhaite EXACTEMENT ${currentRecipesCount} recette(s) pour ${currentPortions} personne(s). Adapte bien les quantités.
+IMPORTANT : Propose des idées de repas très variées, originales, et tirées de différentes cultures culinaires mondiales (Asie, Amérique latine, Moyen-Orient, Afrique, Europe, etc.). Évite à tout prix les plats trop basiques, répétitifs ou génériques comme les simples salades composées ou les omelettes.
 1. Pas de décimales pour les pièces.
 2. Utilise "gramme" (g) ou "Litre" (L). N'utilise JAMAIS de millilitres (ml) ou centilitres (cl). Tu peux utiliser des décimales pour les Litres (ex: 0.2 L).
 Sinon, tu dois OBLIGATOIREMENT répondre avec un objet JSON strict correspondant à ce format exact :
@@ -1185,7 +1186,7 @@ Rayons STRICTEMENT : "Fruits & Légumes", "Produits Laitiers", "Boulangerie", "�
 
             document.getElementById(`recipe-card-${recipeId}`).innerHTML = `<div class="loader" style="padding: 20px 0;"><div class="spinner"></div>Changement en cours...</div>`;
 
-            const systemPrompt = `Tu es un assistant culinaire français. Demande initiale : "${lastUserIntention}", pour ${currentPortions} personne(s). Il ne souhaite pas conserver la recette "${oldRecipe.nom}". Génère UNE SEULE nouvelle recette différente. Adapte les quantités. Pas de décimales pour les pièces. Utilise gramme (g) ou Litre (L), jamais de ml. Tu peux utiliser des décimales pour les Litres (ex: 0.25 L).
+            const systemPrompt = `Tu es un assistant culinaire expert en cuisine du monde. Demande initiale : "${lastUserIntention}", pour ${currentPortions} personne(s). Il ne souhaite pas conserver la recette "${oldRecipe.nom}". Génère UNE SEULE nouvelle recette différente, très originale et inspirée de la cuisine internationale (évite les salades et omelettes basiques). Demande initiale : "${lastUserIntention}", pour ${currentPortions} personne(s). Il ne souhaite pas conserver la recette "${oldRecipe.nom}". Génère UNE SEULE nouvelle recette différente. Adapte les quantités. Pas de décimales pour les pièces. Utilise gramme (g) ou Litre (L), jamais de ml. Tu peux utiliser des décimales pour les Litres (ex: 0.25 L).
 JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom", "emoji": "🥗", "temps_preparation": 15, "temps_cuisson": 20, "budget_par_personne": "3,50€", "portions": ${currentPortions}, "ingredients": [ {"nom": "Lait", "qte": "0.5", "unite": "L", "rayon": "Produits Laitiers"} ], "etapes": ["Laver les tomates."] } ] }`;
 
             try {
