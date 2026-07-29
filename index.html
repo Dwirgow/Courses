@@ -484,6 +484,7 @@
         <div id="view-favorites" class="view">
             <div class="view-content">
                 <h3 style="margin-bottom:15px; font-size:1.1rem; text-align: center;">❤️ Vos recettes préférées</h3>
+				<button onclick="openManualRecipeModal()" style="width: 100%; padding: 14px; margin-bottom: 20px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 16px; font-weight: bold; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">➕ Ajouter une recette manuellement</button>
                 <div id="favorites-container" class="recipe-list"></div> 
             </div>
         </div>
@@ -542,6 +543,50 @@
             </div>
         </div>
     </div>
+
+<!-- NOUVELLE MODALE POUR AJOUT MANUEL -->
+        <!-- MODALE POUR AJOUT ET MODIFICATION MANUELLE -->
+        <div class="modal-overlay" id="manual-recipe-modal" style="z-index: 10001; justify-content: flex-end;">
+            <div class="modal-content" style="height: 85%; padding: 25px; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 id="manual-modal-title" style="font-weight: 800; font-size: 1.3rem; color: var(--text-main);">📝 Nouvelle Recette</h3>
+                    <button onclick="closeManualRecipeModal()" style="background:none; border:none; font-size:1.8rem; cursor:pointer; color: var(--text-muted);">×</button>
+                </div>
+                
+                <!-- Champ caché pour stocker l'ID lors d'une modification -->
+                <input type="hidden" id="manual-recipe-id" value="">
+                
+                <label style="font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block;">Titre de la recette :</label>
+                <input type="text" id="manual-nom" placeholder="Ex: Tarte aux pommes de Mamie" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none;">
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <label style="font-weight: 600; font-size: 0.8rem; margin-bottom: 5px; display: block;">Emoji :</label>
+                        <input type="text" id="manual-emoji" value="🍽️" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1.2rem; text-align: center; outline: none;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-weight: 600; font-size: 0.8rem; margin-bottom: 5px; display: block;">Prép (min) :</label>
+                        <input type="number" id="manual-prep" value="15" min="0" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; text-align: center; outline: none;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-weight: 600; font-size: 0.8rem; margin-bottom: 5px; display: block;">Cuisson (min) :</label>
+                        <input type="number" id="manual-cuisson" value="20" min="0" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; text-align: center; outline: none;">
+                    </div>
+                </div>
+
+                <label style="font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block;">Portions :</label>
+                <input type="number" id="manual-portions" value="4" min="1" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none;">
+
+                <label style="font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block;">Ingrédients (1 par ligne) :</label>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px;">Format conseillé : <i>Quantité Unité Ingrédient</i> (Ex: 200 g Farine)</p>
+                <textarea id="manual-ingredients" rows="5" placeholder="200 g Farine&#10;3 pièces Pommes&#10;50 g Beurre" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; outline: none; resize: none; font-family: inherit;"></textarea>
+
+                <label style="font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block;">Préparation (Optionnel) :</label>
+                <textarea id="manual-etapes" rows="4" placeholder="1. Éplucher les pommes...&#10;2. Étaler la pâte..." style="width: 100%; padding: 12px; margin-bottom: 25px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; outline: none; resize: none; font-family: inherit;"></textarea>
+                
+                <button onclick="saveManualRecipe()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 14px; font-weight: bold; font-size: 1.05rem; cursor: pointer; margin-bottom: 20px;">💾 Enregistrer</button>
+            </div>
+        </div>
 
 	<div class="modal-overlay" id="confirm-modal" style="z-index: 10000; justify-content: center; align-items: center; display: none;">
             <div style="background: white; padding: 25px; border-radius: 24px; width: 90%; max-width: 350px; text-align: center; box-shadow: var(--shadow-lg); animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
@@ -741,6 +786,9 @@
                         </div>
                     <div class="recipe-actions">
                         <button class="btn-action btn-view" onclick="openRecipeDetails(${recipe.id})">📖 Lire</button>
+                        <!-- NOUVEAU BOUTON ÉDITER -->
+                        <button class="btn-action" style="background: #fef3c7; color: #b45309;" onclick="openManualRecipeModal(${recipe.id})">✏️ Éditer</button>
+                        
                         <button class="btn-action btn-add-single ${shoppingList.some(i => i.sourceNames && i.sourceNames.includes(recipe.nom)) ? 'added' : ''}" 
                                 id="btn-add-fav-${recipe.id}" 
                                 onclick="addRecipeToCart(${recipe.id}, 'fav')">
@@ -1273,6 +1321,146 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
 
         function closeRecipeDetails() { document.getElementById('recipe-details-modal').style.display = 'none'; }
         renderApp();
+		
+		// --- AUTO-CLASSIFICATION DES INGRÉDIENTS ---
+        function guessCategory(nom) {
+            const str = nom.toLowerCase();
+            if (/(pomme|poire|banane|fraise|orange|citron|tomate|carotte|oignon|ail|salade|courgette|aubergine|poivron|légume|fruit|brocoli|chou|champignon)/.test(str)) return "Fruits & Légumes";
+            if (/(lait|beurre|crème|fromage|yaourt|gruyère|mozzarella|parmesan|mascarpone)/.test(str)) return "Produits Laitiers";
+            if (/(poulet|boeuf|porc|veau|agneau|viande|jambon|saucisse|poisson|saumon|cabillaud|crevette|thon)/.test(str)) return "Viandes & Poissons";
+            if (/(pain|baguette|brioche|croissant)/.test(str)) return "Boulangerie";
+            if (/(sucre|chocolat|miel|confiture|farine|levure|vanille)/.test(str)) return "Épicerie sucrée";
+            if (/(sel|poivre|épice|huile|vinaigre|moutarde|mayonnaise|sauce|bouillon)/.test(str)) return "Sauces & Condiments";
+            if (/(pâte|riz|semoule|pomme de terre|lentille|quinoa)/.test(str)) return "Féculents";
+            if (/(eau|jus|vin|bière|soda)/.test(str)) return "Boissons";
+            return "Divers / Autre";
+        }
+
+        // --- GESTION DES RECETTES MANUELLES ---
+        function openManualRecipeModal(recipeId = null) {
+            const modalTitle = document.getElementById('manual-modal-title');
+            
+            if (recipeId) {
+                // Mode Modification : on cherche la recette et on pré-remplit les champs
+                const recipe = favorites.find(r => r.id === recipeId);
+                if (recipe) {
+                    modalTitle.innerText = "✏️ Modifier la recette";
+                    document.getElementById('manual-recipe-id').value = recipe.id;
+                    document.getElementById('manual-nom').value = recipe.nom;
+                    document.getElementById('manual-emoji').value = recipe.emoji;
+                    document.getElementById('manual-prep').value = recipe.temps_preparation !== "-" ? recipe.temps_preparation : "15";
+                    document.getElementById('manual-cuisson').value = recipe.temps_cuisson !== "-" ? recipe.temps_cuisson : "20";
+                    document.getElementById('manual-portions').value = recipe.portions;
+                    
+                    // Reconstruire le texte des ingrédients
+                    const ingText = recipe.ingredients.map(ing => {
+                        let qte = (ing.qte && ing.qte !== 1) ? ing.qte + " " : (ing.unite !== "pièce" ? "1 " : "");
+                        let unit = (ing.unite && ing.unite !== "pièce" && ing.unite !== "pièces") ? ing.unite + " " : "";
+                        return (qte + unit + ing.nom).trim();
+                    }).join('\n');
+                    document.getElementById('manual-ingredients').value = ingText;
+                    
+                    // Reconstruire le texte des étapes
+                    document.getElementById('manual-etapes').value = recipe.etapes.join('\n');
+                }
+            } else {
+                // Mode Création : on vide tout
+                modalTitle.innerText = "📝 Nouvelle Recette";
+                document.getElementById('manual-recipe-id').value = '';
+                document.getElementById('manual-nom').value = '';
+                document.getElementById('manual-emoji').value = '🍽️';
+                document.getElementById('manual-prep').value = '15';
+                document.getElementById('manual-cuisson').value = '20';
+                document.getElementById('manual-portions').value = '4';
+                document.getElementById('manual-ingredients').value = '';
+                document.getElementById('manual-etapes').value = '';
+            }
+            
+            document.getElementById('manual-recipe-modal').style.display = 'flex';
+        }
+
+        function closeManualRecipeModal() {
+            document.getElementById('manual-recipe-modal').style.display = 'none';
+        }
+
+        function saveManualRecipe() {
+            const recipeId = document.getElementById('manual-recipe-id').value;
+            const nom = document.getElementById('manual-nom').value.trim();
+            const emoji = document.getElementById('manual-emoji').value.trim() || '🍽️';
+            const prep = document.getElementById('manual-prep').value || "-";
+            const cuisson = document.getElementById('manual-cuisson').value || "-";
+            const portions = parseInt(document.getElementById('manual-portions').value) || 4;
+            const ingredientsText = document.getElementById('manual-ingredients').value.trim();
+            const etapesText = document.getElementById('manual-etapes').value.trim();
+            
+            if (!nom) {
+                alert("Veuillez donner un nom à votre recette !");
+                return;
+            }
+
+            // Découpage intelligent et Catégorisation automatique
+            const ingredientsList = [];
+            if (ingredientsText) {
+                const lines = ingredientsText.split('\n');
+                lines.forEach(line => {
+                    const cleanLine = line.trim();
+                    if (cleanLine === '') return;
+                    
+                    // Nouveau détecteur : on cherche juste si la ligne commence par un chiffre
+                    const match = cleanLine.match(/^([\d.,]+)\s+(.*)$/);
+                    
+                    if (match) {
+                        // S'il y a un chiffre (ex: "2 oignons" ou "200 g Farine")
+                        ingredientsList.push({
+                            qte: parseFloat(match[1].replace(',', '.')),
+                            unite: "pièce", // On force "pièce" (le mot sera masqué à l'affichage)
+                            nom: match[2],  // Le reste du texte ("oignons" ou "g Farine")
+                            rayon: guessCategory(match[2]) 
+                        });
+                    } else {
+                        // S'il n'y a pas de chiffre au début (ex: "Sel", "Boîte de champignons")
+                        ingredientsList.push({
+                            qte: 1,
+                            unite: "pièce",
+                            nom: cleanLine,
+                            rayon: guessCategory(cleanLine)
+                        });
+                    }
+                });
+            }
+
+            let etapesList = ["Pas d'instructions renseignées."];
+            if (etapesText) {
+                etapesList = etapesText.split('\n').filter(e => e.trim() !== '');
+            }
+
+            const newRecipe = {
+                id: recipeId ? parseInt(recipeId) : Date.now(),
+                nom: nom,
+                emoji: emoji,
+                temps_preparation: prep,
+                temps_cuisson: cuisson,
+                budget_par_personne: "Fait maison",
+                portions: portions,
+                ingredients: ingredientsList,
+                etapes: etapesList
+            };
+
+            if (recipeId) {
+                // Mise à jour d'une recette existante
+                const index = favorites.findIndex(r => r.id === parseInt(recipeId));
+                if (index !== -1) {
+                    favorites[index] = newRecipe;
+                }
+            } else {
+                // Ajout d'une nouvelle recette
+                favorites.unshift(newRecipe);
+            }
+
+            saveToFirebase();
+            renderFavorites();
+            closeManualRecipeModal();
+        }
     </script>
 </body>
 </html>
