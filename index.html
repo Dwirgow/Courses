@@ -577,10 +577,14 @@
                 <label style="font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block;">Portions :</label>
                 <input type="number" id="manual-portions" value="4" min="1" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none;">
 
-                <label style="font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block;">Ingrédients (1 par ligne) :</label>
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px;">Format conseillé : <i>Quantité Unité Ingrédient</i> (Ex: 200 g Farine)</p>
-                <textarea id="manual-ingredients" rows="5" placeholder="200 g Farine&#10;3 pièces Pommes&#10;50 g Beurre" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; outline: none; resize: none; font-family: inherit;"></textarea>
-
+                <label style="font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block;">Ingrédients :</label>
+                
+                <!-- NOUVEAU CONTENEUR POUR LES INGRÉDIENTS -->
+                <div id="manual-ingredients-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                    </div>
+                
+                <!-- BOUTON POUR AJOUTER UNE LIGNE -->
+                <button onclick="addManualIngredientRow()" style="width: 100%; padding: 10px; margin-bottom: 25px; background: #f8fafc; color: var(--primary); border: 2px dashed #cbd5e1; border-radius: 12px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">➕ Ajouter un ingrédient</button>
                 <label style="font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; display: block;">Préparation (Optionnel) :</label>
                 <textarea id="manual-etapes" rows="4" placeholder="1. Éplucher les pommes...&#10;2. Étaler la pâte..." style="width: 100%; padding: 12px; margin-bottom: 25px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; outline: none; resize: none; font-family: inherit;"></textarea>
                 
@@ -1339,9 +1343,12 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
         // --- GESTION DES RECETTES MANUELLES ---
         function openManualRecipeModal(recipeId = null) {
             const modalTitle = document.getElementById('manual-modal-title');
+            const ingredientsContainer = document.getElementById('manual-ingredients-list');
+            
+            // On vide toujours la liste des ingrédients avant de l'ouvrir
+            ingredientsContainer.innerHTML = '';
             
             if (recipeId) {
-                // Mode Modification : on cherche la recette et on pré-remplit les champs
                 const recipe = favorites.find(r => r.id === recipeId);
                 if (recipe) {
                     modalTitle.innerText = "✏️ Modifier la recette";
@@ -1352,15 +1359,13 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                     document.getElementById('manual-cuisson').value = recipe.temps_cuisson !== "-" ? recipe.temps_cuisson : "20";
                     document.getElementById('manual-portions').value = recipe.portions;
                     
-                    // Reconstruire le texte des ingrédients
-                    const ingText = recipe.ingredients.map(ing => {
-                        let qte = (ing.qte && ing.qte !== 1) ? ing.qte + " " : (ing.unite !== "pièce" ? "1 " : "");
-                        let unit = (ing.unite && ing.unite !== "pièce" && ing.unite !== "pièces") ? ing.unite + " " : "";
-                        return (qte + unit + ing.nom).trim();
-                    }).join('\n');
-                    document.getElementById('manual-ingredients').value = ingText;
+                    // Remplir les lignes d'ingrédients existantes
+                    recipe.ingredients.forEach(ing => {
+                        let qte = ing.qte === 1 && ing.unite === "pièce" ? "" : ing.qte; // Masque le "1" si c'est une pièce sans quantité précisée
+                        let unite = (ing.unite === "pièce" || ing.unite === "pièces") ? "" : ing.unite;
+                        addManualIngredientRow(qte, unite, ing.nom);
+                    });
                     
-                    // Reconstruire le texte des étapes
                     document.getElementById('manual-etapes').value = recipe.etapes.join('\n');
                 }
             } else {
@@ -1372,8 +1377,12 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                 document.getElementById('manual-prep').value = '15';
                 document.getElementById('manual-cuisson').value = '20';
                 document.getElementById('manual-portions').value = '4';
-                document.getElementById('manual-ingredients').value = '';
                 document.getElementById('manual-etapes').value = '';
+                
+                // On ajoute 3 lignes vides par défaut pour inciter à remplir
+                addManualIngredientRow();
+                addManualIngredientRow();
+                addManualIngredientRow();
             }
             
             document.getElementById('manual-recipe-modal').style.display = 'flex';
@@ -1382,15 +1391,32 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
         function closeManualRecipeModal() {
             document.getElementById('manual-recipe-modal').style.display = 'none';
         }
+		
+		// --- GESTION DES LIGNES D'INGRÉDIENTS DYNAMIQUES ---
+        function addManualIngredientRow(qte = '', unite = '', nom = '') {
+            const container = document.getElementById('manual-ingredients-list');
+            const row = document.createElement('div');
+            row.className = 'ingredient-row';
+            row.style.display = 'flex';
+            row.style.gap = '8px';
+            row.style.alignItems = 'center';
+            
+            row.innerHTML = `
+                <input type="text" class="ing-qte" placeholder="Qté" value="${qte}" style="width: 50px; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; outline: none; text-align: center;">
+                <input type="text" class="ing-unite" placeholder="Unité" value="${unite}" style="width: 55px; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; outline: none;">
+                <input type="text" class="ing-nom" placeholder="Nom de l'ingrédient" value="${nom}" style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; outline: none;">
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: var(--danger); font-size: 1.4rem; cursor: pointer; padding: 0 5px; line-height: 1;">×</button>
+            `;
+            container.appendChild(row);
+        }
 
-        function saveManualRecipe() {
+function saveManualRecipe() {
             const recipeId = document.getElementById('manual-recipe-id').value;
             const nom = document.getElementById('manual-nom').value.trim();
             const emoji = document.getElementById('manual-emoji').value.trim() || '🍽️';
             const prep = document.getElementById('manual-prep').value || "-";
             const cuisson = document.getElementById('manual-cuisson').value || "-";
             const portions = parseInt(document.getElementById('manual-portions').value) || 4;
-            const ingredientsText = document.getElementById('manual-ingredients').value.trim();
             const etapesText = document.getElementById('manual-etapes').value.trim();
             
             if (!nom) {
@@ -1398,36 +1424,29 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
                 return;
             }
 
-            // Découpage intelligent et Catégorisation automatique
+            // Récupération stricte et propre depuis les champs séparés
             const ingredientsList = [];
-            if (ingredientsText) {
-                const lines = ingredientsText.split('\n');
-                lines.forEach(line => {
-                    const cleanLine = line.trim();
-                    if (cleanLine === '') return;
-                    
-                    // Nouveau détecteur : on cherche juste si la ligne commence par un chiffre
-                    const match = cleanLine.match(/^([\d.,]+)\s+(.*)$/);
-                    
-                    if (match) {
-                        // S'il y a un chiffre (ex: "2 oignons" ou "200 g Farine")
-                        ingredientsList.push({
-                            qte: parseFloat(match[1].replace(',', '.')),
-                            unite: "pièce", // On force "pièce" (le mot sera masqué à l'affichage)
-                            nom: match[2],  // Le reste du texte ("oignons" ou "g Farine")
-                            rayon: guessCategory(match[2]) 
-                        });
-                    } else {
-                        // S'il n'y a pas de chiffre au début (ex: "Sel", "Boîte de champignons")
-                        ingredientsList.push({
-                            qte: 1,
-                            unite: "pièce",
-                            nom: cleanLine,
-                            rayon: guessCategory(cleanLine)
-                        });
-                    }
+            const rows = document.querySelectorAll('.ingredient-row');
+            
+            rows.forEach(row => {
+                const qteInput = row.querySelector('.ing-qte').value.trim().replace(',', '.');
+                const uniteInput = row.querySelector('.ing-unite').value.trim();
+                const nomInput = row.querySelector('.ing-nom').value.trim();
+                
+                // Si la ligne n'a pas de nom, on l'ignore (l'utilisateur a laissé une ligne vide)
+                if (nomInput === '') return;
+                
+                const qteParsed = parseFloat(qteInput);
+                const finalQte = isNaN(qteParsed) ? 1 : qteParsed; // Si pas de quantité, on met 1 par défaut
+                const finalUnite = uniteInput === '' ? 'pièce' : uniteInput; // Si pas d'unité, on met pièce (caché à l'affichage)
+                
+                ingredientsList.push({
+                    qte: finalQte,
+                    unite: finalUnite,
+                    nom: nomInput,
+                    rayon: guessCategory(nomInput) // Classement automatique selon le nom
                 });
-            }
+            });
 
             let etapesList = ["Pas d'instructions renseignées."];
             if (etapesText) {
@@ -1447,13 +1466,9 @@ JSON strict format : { "recipes": [ { "id": ${Date.now()}, "nom": "Nouveau Nom",
             };
 
             if (recipeId) {
-                // Mise à jour d'une recette existante
                 const index = favorites.findIndex(r => r.id === parseInt(recipeId));
-                if (index !== -1) {
-                    favorites[index] = newRecipe;
-                }
+                if (index !== -1) favorites[index] = newRecipe;
             } else {
-                // Ajout d'une nouvelle recette
                 favorites.unshift(newRecipe);
             }
 
