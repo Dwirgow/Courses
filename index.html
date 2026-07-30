@@ -1146,7 +1146,27 @@ function autoSuggestCategory() {
 		}
 
         function removeFromMenu(recipeId) {
+            // 1. On cherche la recette concernée dans le menu
+            const recipe = plannedRecipes.find(r => r.id === recipeId);
+            
+            if (recipe) {
+                // 2. On vérifie si la recette est actuellement présente dans la liste de courses
+                const isAlreadyAdded = shoppingList.some(item => 
+                    item.sourceType === 'recipe' && 
+                    item.sourceNames && 
+                    item.sourceNames.includes(recipe.nom)
+                );
+                
+                // 3. Si elle y est, on utilise notre fonction existante pour la retirer proprement du caddie
+                if (isAlreadyAdded) {
+                    addRecipeToCart(recipeId); 
+                }
+            }
+
+            // 4. Ensuite, on la supprime officiellement de la liste du menu
             plannedRecipes = plannedRecipes.filter(r => r.id !== recipeId);
+            
+            // 5. On rafraîchit l'affichage et on sauvegarde
             renderMenu();
             saveToFirebase();
         }
